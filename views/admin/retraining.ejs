@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">Retraining Workflow</h1>
+  <p class="text-slate-400 mb-8">New model versions require admin review and approval before becoming production models of record.</p>
+
+  <% if (approved) { %>
+    <div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-sm px-4 py-3 rounded-lg mb-6">✓ Model registered and marked current successfully.</div>
+  <% } %>
+
+  <div class="grid md:grid-cols-3 gap-6 mb-8">
+    <div class="glass-card p-6 rounded-2xl text-center"><p class="text-2xl font-bold brand-gradient-text"><%= totalApplications %></p><p class="text-xs text-slate-400 mt-1">Applications Collected</p></div>
+    <div class="glass-card p-6 rounded-2xl text-center"><p class="text-2xl font-bold"><%= totalPredictions %></p><p class="text-xs text-slate-400 mt-1">Predictions Made</p></div>
+    <div class="glass-card p-6 rounded-2xl text-center"><p class="text-2xl font-bold"><%= currentRegistered ? currentRegistered.version : 'None' %></p><p class="text-xs text-slate-400 mt-1">Current Registered Version</p></div>
+  </div>
+
+  <div class="glass-card p-8 rounded-2xl mb-8">
+    <h3 class="font-bold mb-4 text-sm">Workflow Pipeline</h3>
+    <div class="flex flex-wrap items-center gap-2 text-xs mb-6">
+      <span class="glass-card px-3 py-2 rounded-lg <%= metrics ? 'text-emerald-400' : 'text-slate-500' %>"><%= metrics ? '✓' : '○' %> Dataset Loaded</span>
+      <span class="text-cyan-400">→</span>
+      <span class="glass-card px-3 py-2 rounded-lg <%= metrics ? 'text-emerald-400' : 'text-slate-500' %>"><%= metrics ? '✓' : '○' %> Preprocessing</span>
+      <span class="text-cyan-400">→</span>
+      <span class="glass-card px-3 py-2 rounded-lg <%= metrics ? 'text-emerald-400' : 'text-slate-500' %>"><%= metrics ? '✓' : '○' %> Training</span>
+      <span class="text-cyan-400">→</span>
+      <span class="glass-card px-3 py-2 rounded-lg <%= metrics ? 'text-emerald-400' : 'text-slate-500' %>"><%= metrics ? '✓' : '○' %> Evaluation</span>
+      <span class="text-cyan-400">→</span>
+      <span class="glass-card px-3 py-2 rounded-lg <%= metrics ? 'text-emerald-400' : 'text-slate-500' %>"><%= metrics ? '✓' : '○' %> Model Saved</span>
+      <span class="text-cyan-400">→</span>
+      <span class="glass-card px-3 py-2 rounded-lg <%= alreadyRegistered ? 'text-emerald-400' : 'text-amber-400' %>"><%= alreadyRegistered ? '✓' : '●' %> Admin Approval</span>
+    </div>
+
+    <% if (mlError) { %>
+      <p class="text-amber-400 text-sm">⚠ <%= mlError %></p>
+    <% } else if (metrics) { %>
+      <div class="bg-black/20 rounded-xl p-5 mb-4">
+        <p class="text-sm font-semibold mb-2">Latest Trained Model</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <div><p class="text-slate-400">Algorithm</p><p class="font-semibold"><%= metrics.selected_model %></p></div>
+          <div><p class="text-slate-400">Version</p><p class="font-semibold"><%= metrics.model_version %></p></div>
+          <div><p class="text-slate-400">F1-Score</p><p class="font-semibold"><%= (metrics.selected_model_metrics.f1_score*100).toFixed(2) %>%</p></div>
+          <div><p class="text-slate-400">ROC-AUC</p><p class="font-semibold"><%= (metrics.selected_model_metrics.roc_auc*100).toFixed(2) %>%</p></div>
+        </div>
+      </div>
+
+      <% if (alreadyRegistered) { %>
+        <p class="text-xs text-emerald-400">✓ This exact trained model is already registered as the current production version.</p>
+      <% } else { %>
+        <form method="POST" action="/admin/retraining/approve">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <p class="text-xs text-slate-400 mb-3">Review the metrics above. Registering will mark this as the current production model and archive the previous one — this does not happen automatically.</p>
+          <button type="submit" class="btn-gradient px-6 py-3 rounded-lg font-semibold">✓ Approve &amp; Register This Model</button>
+        </form>
+      <% } %>
+    <% } %>
+  </div>
+
+  <div class="glass-card p-8 rounded-2xl">
+    <h3 class="font-bold mb-3 text-sm">How to Retrain</h3>
+    <p class="text-sm text-slate-400 mb-4">Training runs manually from the terminal to keep the pipeline transparent and reproducible for academic evaluation:</p>
+    <div class="bg-black/30 rounded-lg p-4 font-mono text-xs text-cyan-300 mb-2">
+      cd ml<br/>python train.py<br/>uvicorn predict_api:app --reload --port 8000
+    </div>
+    <p class="text-xs text-slate-500">After training completes, return to this page and click "Approve & Register" to make it official.</p>
+  </div>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+</body>
+</html>

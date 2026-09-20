@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/navbar') %>
+
+  <div class="max-w-4xl mx-auto px-6 pt-28 pb-16">
+    <div class="flex justify-between items-center mb-2">
+      <h1 class="text-2xl font-bold">Loan Application</h1>
+      <span id="draft-status" class="text-xs text-slate-500"></span>
+    </div>
+    <p class="text-slate-400 text-sm mb-8">Complete all steps to submit your application for AI analysis. Your progress is saved automatically.</p>
+
+    <% if (error) { %>
+      <div class="bg-red-500/10 border border-red-500/40 text-red-300 text-sm px-4 py-3 rounded-lg mb-6">⚠ <%= error %></div>
+    <% } %>
+    <% if (draft) { %>
+      <div class="bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-sm px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
+        <span>📝 Resuming your saved draft (Step <%= draft.currentStep %> of 6)</span>
+        <form method="POST" action="/loan/apply/draft/<%= draft._id %>/delete" onsubmit="return confirm('Delete this draft and start fresh?');">
+          <button type="submit" class="text-red-400 hover:underline text-xs">Discard Draft</button>
+        </form>
+      </div>
+    <% } %>
+
+    <div class="mb-10">
+      <div class="flex justify-between text-xs mb-2" id="step-labels">
+        <span data-label="1" class="step-label active">① Personal</span>
+        <span data-label="2" class="step-label">② Employment</span>
+        <span data-label="3" class="step-label">③ Financial</span>
+        <span data-label="4" class="step-label">④ Loan</span>
+        <span data-label="5" class="step-label">⑤ Credit</span>
+        <span data-label="6" class="step-label">⑥ Review</span>
+      </div>
+      <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+        <div id="progress-fill" class="h-2 btn-gradient rounded-full transition-all duration-400" style="width:16.66%"></div>
+      </div>
+    </div>
+
+    <form method="POST" action="/loan/apply" id="wizard-form" class="glass-card p-8 rounded-2xl" novalidate>
+      <%- include('../partials/csrf-field') %>
+      <input type="hidden" name="draftId" id="draftId" value="<%= draft ? draft._id : '' %>" />
+      <input type="hidden" name="currentStep" id="currentStepInput" value="1" />
+
+      <!-- STEP 1 — PERSONAL -->
+      <div class="wizard-step" data-step="1">
+        <h2 class="font-bold text-lg mb-6 brand-gradient-text">① Personal Information</h2>
+        <div class="grid md:grid-cols-2 gap-5">
+          <div>
+            <label class="text-sm text-slate-300">Full Name *</label>
+            <input name="fullName" required class="input-field" value="<%= draft ? draft.fullName||'' : (old.fullName||'') %>" />
+            <p class="field-error"></p>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Age *</label>
+            <input name="age" type="number" min="18" max="70" required class="input-field" value="<%= draft ? draft.age||'' : (old.age||'') %>" />
+            <p class="field-error"></p>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Gender *</label>
+            <select name="gender" required class="input-field">
+              <option value="">Select</option>
+              <option <%= draft && draft.gender==='Male'?'selected':'' %>>Male</option>
+              <option <%= draft && draft.gender==='Female'?'selected':'' %>>Female</option>
+              <option <%= draft && draft.gender==='Other'?'selected':'' %>>Other</option>
+            </select>
+            <p class="field-error"></p>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Marital Status *</label>
+            <select name="maritalStatus" required class="input-field">
+              <option value="">Select</option>
+              <option <%= draft && draft.maritalStatus==='Single'?'selected':'' %>>Single</option>
+              <option <%= draft && draft.maritalStatus==='Married'?'selected':'' %>>Married</option>
+            </select>
+            <p class="field-error"></p>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Number of Dependents</label>
+            <input name="dependents" type="number" min="0" max="15" class="input-field" value="<%= draft ? draft.dependents : '0' %>" />
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Education *</label>
+            <select name="education" required class="input-field">
+              <option value="">Select</option>
+              <option <%= draft && draft.education==='Graduate'?'selected':'' %>>Graduate</option>
+              <option <%= draft && draft.education==='Not Graduate'?'selected':'' %>>Not Graduate</option>
+              <option <%= draft && draft.education==='Post Graduate'?'selected':'' %>>Post Graduate</option>
+            </select>
+            <p class="field-error"></p>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Residential Status *</label>
+            <select name="residentialStatus" required class="input-field">
+              <option value="">Select</option>
+              <option <%= draft && draft.residentialStatus==='Owned'?'selected':'' %>>Owned</option>
+              <option <%= draft && draft.residentialStatus==='Rented'?'selected':'' %>>Rented</option>
+              <option <%= draft && draft.residentialStatus==='Living with Family'?'selected':'' %>>Living with Family</option>
+            </select>
+            <p class="field-error"></p>
+          </div>
+        </div>
+        <div class="flex justify-end mt-8">
+          <button type="button" class="btn-gradient px-6 py-3 rounded-lg font-semibold next-btn">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 — EMPLOYMENT -->
+      <div class="wizard-step hidden" data-step="2">
+        <h2 class="font-bold text-lg mb-6 brand-gradient-text">② Employment</h2>
+        <div class="grid md:grid-cols-2 gap-5">
+          <div>
+            <label class="text-sm text-slate-300">Employment Type *</label>
+            <select name="employmentType" required class="input-field">
+              <option value="">Select</option>
+              <option>Salaried</option><option>Self-Employed</option><option>Business</option><option>Unemployed</option>
+            </select>
+            <p class="field-error"></p>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Occupation *</label>
+            <input name="occupation" required class="input-field" value="<%= draft ? draft.occupation||'' : '' %>" />
+            <p class="field-error"></p>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Employer Name</label>
+            <input name="employer" class="input-field" value="<%= draft ? draft.employer||'' : '' %>" />
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Years of Employment *</label>
+            <input name="yearsOfEmployment" type="number" min="0" max="50" step="0.5" required class="input-field" value="<%= draft ? draft.yearsOfEmployment||'' : '' %>" />
+            <p class="field-error"></p>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Employment Stability</label>
+            <select name="employmentStability" class="input-field">
+              <option>Stable</option><option>Moderate</option><option>Unstable</option>
+            </select>
+          </div>
+          <label class="flex items-center gap-2 text-sm text-slate-300 md:col-span-2">
+            <input type="checkbox" name="selfEmployed" class="accent-cyan-400" /> I am self-employed
+          </label>
+        </div>
+        <div class="flex justify-between mt-8">
+          <button type="button" class="px-6 py-3 rounded-lg font-semibold border border-white/20 hover:bg-white/5 transition prev-btn">← Back</button>
+          <button type="button" class="btn-gradient px-6 py-3 rounded-lg font-semibold next-btn">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 — FINANCIAL -->
+      <div class="wizard-step hidden" data-step="3">
+        <h2 class="font-bold text-lg mb-6 brand-gradient-text">③ Financial Information</h2>
+        <div class="grid md:grid-cols-2 gap-5">
+          <div>
+            <label class="text-sm text-slate-300">Annual Income (₹) *</label>
+            <input name="annualIncome" type="number" min="50000" required class="input-field dti-input" value="<%= draft ? draft.annualIncome||'' : '' %>" />
+            <p class="field-error"></p>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Monthly Income (₹) *</label>
+            <input name="monthlyIncome" type="number" min="0" required class="input-field dti-input" value="<%= draft ? draft.monthlyIncome||'' : '' %>" />
+            <p class="field-error"></p>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Co-Applicant Income (₹)</label>
+            <input name="coApplicantIncome" type="number" min="0" class="input-field dti-input" value="<%= draft ? draft.coApplicantIncome||'0' : '0' %>" />
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Monthly Expenses (₹) *</label>
+            <input name="monthlyExpenses" type="number" min="0" required class="input-field" value="<%= draft ? draft.monthlyExpenses||'' : '' %>" />
+            <p class="field-error"></p>
+          </div>
+          <label class="flex items-center gap-2 text-sm text-slate-300 md:col-span-2">
+            <input type="checkbox" name="hasExistingLoan" class="accent-cyan-400" /> I have an existing loan
+          </label>
+          <div>
+            <label class="text-sm text-slate-300">Existing EMI (₹)</label>
+            <input name="existingEMI" type="number" min="0" class="input-field dti-input" value="<%= draft ? draft.existingEMI||'0' : '0' %>" />
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Assets Value (₹)</label>
+            <input name="assets" type="number" min="0" class="input-field" value="<%= draft ? draft.assets||'0' : '0' %>" />
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Liabilities (₹)</label>
+            <input name="liabilities" type="number" min="0" class="input-field" value="<%= draft ? draft.liabilities||'0' : '0' %>" />
+          </div>
+        </div>
+
+        <div class="glass-card p-5 rounded-xl mt-6">
+          <div class="flex justify-between items-center mb-2">
+            <p class="text-sm font-semibold">Debt-to-Income Ratio</p>
+            <p id="dti-value" class="text-lg font-extrabold brand-gradient-text">0%</p>
+          </div>
+          <div class="w-full bg-white/10 rounded-full h-2.5 overflow-hidden">
+            <div id="dti-bar" class="h-2.5 rounded-full btn-gradient transition-all duration-300" style="width:0%"></div>
+          </div>
+          <p class="text-xs text-slate-500 mt-2">Project-defined estimate, not an official lending metric.</p>
+        </div>
+
+        <div class="flex justify-between mt-8">
+          <button type="button" class="px-6 py-3 rounded-lg font-semibold border border-white/20 hover:bg-white/5 transition prev-btn">← Back</button>
+          <button type="button" class="btn-gradient px-6 py-3 rounded-lg font-semibold next-btn">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4 — LOAN -->
+      <div class="wizard-step hidden" data-step="4">
+        <h2 class="font-bold text-lg mb-6 brand-gradient-text">④ Loan Information</h2>
+        <div class="grid md:grid-cols-2 gap-5">
+          <div>
+            <label class="text-sm text-slate-300">Loan Amount (₹) *</label>
+            <input name="loanAmount" type="number" min="10000" required class="input-field" value="<%= draft ? draft.loanAmount||'' : '' %>" />
+            <p class="field-error"></p>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Loan Tenure *</label>
+            <select name="loanTenure" required class="input-field">
+              <option value="12">12 Months</option>
+              <option value="24">24 Months</option>
+              <option value="36">36 Months</option>
+              <option value="60" selected>60 Months</option>
+              <option value="120">120 Months</option>
+              <option value="240">240 Months</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Loan Purpose *</label>
+            <select name="loanPurpose" required class="input-field">
+              <option value="">Select</option>
+              <option>Education</option><option>Home</option><option>Vehicle</option>
+              <option>Personal</option><option>Business</option><option>Medical</option>
+            </select>
+            <p class="field-error"></p>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Repayment Preference *</label>
+            <select name="repaymentPreference" required class="input-field">
+              <option>EMI</option><option>Lump Sum</option><option>Flexible</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-between mt-8">
+          <button type="button" class="px-6 py-3 rounded-lg font-semibold border border-white/20 hover:bg-white/5 transition prev-btn">← Back</button>
+          <button type="button" class="btn-gradient px-6 py-3 rounded-lg font-semibold next-btn">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 5 — CREDIT -->
+      <div class="wizard-step hidden" data-step="5">
+        <h2 class="font-bold text-lg mb-6 brand-gradient-text">⑤ Credit Information</h2>
+        <div class="grid md:grid-cols-2 gap-5">
+          <div>
+            <label class="text-sm text-slate-300">Credit History *</label>
+            <select name="creditHistory" required class="input-field">
+              <option>Good</option><option>Average</option><option>Poor</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Previous Loan Status *</label>
+            <select name="previousLoanStatus" required class="input-field">
+              <option>None</option><option>Fully Repaid</option><option>Currently Active</option><option>Defaulted</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Existing Credit Lines</label>
+            <input name="existingCredit" type="number" min="0" class="input-field" value="0" />
+          </div>
+          <div>
+            <label class="text-sm text-slate-300">Credit Score (optional, 300–900)</label>
+            <input name="creditScore" type="number" min="300" max="900" class="input-field" />
+          </div>
+        </div>
+        <div class="flex justify-between mt-8">
+          <button type="button" class="px-6 py-3 rounded-lg font-semibold border border-white/20 hover:bg-white/5 transition prev-btn">← Back</button>
+          <button type="button" class="btn-gradient px-6 py-3 rounded-lg font-semibold next-btn" id="review-btn">Review Application →</button>
+        </div>
+      </div>
+
+      <!-- STEP 6 — REVIEW -->
+      <div class="wizard-step hidden" data-step="6">
+        <h2 class="font-bold text-lg mb-6 brand-gradient-text">⑥ Review Your Application</h2>
+        <div class="space-y-3 mb-8">
+          <div class="flex justify-between items-center glass-card px-5 py-3 rounded-xl"><span class="text-sm">Personal Information</span><span class="text-emerald-400 font-bold">✓</span></div>
+          <div class="flex justify-between items-center glass-card px-5 py-3 rounded-xl"><span class="text-sm">Employment Information</span><span class="text-emerald-400 font-bold">✓</span></div>
+          <div class="flex justify-between items-center glass-card px-5 py-3 rounded-xl"><span class="text-sm">Financial Information</span><span class="text-emerald-400 font-bold">✓</span></div>
+          <div class="flex justify-between items-center glass-card px-5 py-3 rounded-xl"><span class="text-sm">Loan Information</span><span class="text-emerald-400 font-bold">✓</span></div>
+          <div class="flex justify-between items-center glass-card px-5 py-3 rounded-xl"><span class="text-sm">Credit Information</span><span class="text-emerald-400 font-bold">✓</span></div>
+        </div>
+        <div class="glass-card p-5 rounded-xl mb-8">
+          <p class="text-sm font-semibold mb-2">Final Debt-to-Income Ratio</p>
+          <p id="dti-value-review" class="text-2xl font-extrabold brand-gradient-text mb-2">0%</p>
+          <div class="w-full bg-white/10 rounded-full h-2.5 overflow-hidden">
+            <div id="dti-bar-review" class="h-2.5 rounded-full btn-gradient" style="width:0%"></div>
+          </div>
+        </div>
+        <p class="text-xs text-amber-400 mb-6">⚠ Please review carefully. You can go back to edit any section before submitting.</p>
+        <div class="flex justify-between">
+          <button type="button" class="px-6 py-3 rounded-lg font-semibold border border-white/20 hover:bg-white/5 transition prev-btn">← Edit</button>
+          <button type="submit" class="btn-gradient px-8 py-3 rounded-lg font-semibold">Submit Application ✦</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script src="/js/background.js"></script>
+  <script src="/js/wizard.js"></script>
+</body>
+</html>

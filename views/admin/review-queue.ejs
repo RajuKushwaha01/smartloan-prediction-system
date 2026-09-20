@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">Review Queue</h1>
+  <p class="text-slate-400 mb-8">Applications requiring human-in-the-loop review — either flagged as "Review" by the model, or carrying an anomaly flag.</p>
+
+  <% if (applications.length === 0) { %>
+    <div class="glass-card p-10 rounded-2xl text-center"><p class="text-slate-400">🎉 Nothing needs review right now.</p></div>
+  <% } %>
+
+  <div class="space-y-4">
+    <% applications.forEach(app => {
+         const pred = predictionMap[String(app._id)];
+    %>
+      <div class="glass-card p-6 rounded-2xl">
+        <div class="flex flex-wrap justify-between items-start gap-4 mb-4">
+          <div>
+            <p class="font-bold"><%= app.applicationId %> <span class="text-slate-400 font-normal text-sm">— <%= app.user ? app.user.fullName : 'N/A' %></span></p>
+            <p class="text-xs text-slate-500 mt-0.5">Loan ₹<%= app.loanAmount.toLocaleString('en-IN') %> • Submitted <%= app.createdAt.toDateString() %></p>
+          </div>
+          <% if (pred) { %>
+            <span class="status-pill <%= pred.prediction==='Eligible'?'pill-green':pred.prediction==='Review'?'pill-amber':'pill-red' %>">AI: <%= pred.prediction %> (<%= Math.round(pred.probability*100) %>%)</span>
+          <% } %>
+        </div>
+
+        <% if (app.anomalyFlags && app.anomalyFlags.length > 0) { %>
+          <div class="space-y-1 mb-4">
+            <% app.anomalyFlags.forEach(f => { %>
+              <p class="text-xs text-amber-400">🚩 Anomaly Flag: <%= f.message %></p>
+            <% }) %>
+          </div>
+        <% } %>
+
+        <div class="flex justify-between items-center">
+          <a href="/admin/applications/<%= app._id %>" class="text-cyan-400 hover:underline text-sm">View Full Details →</a>
+          <form method="POST" action="/admin/review-queue/<%= app._id %>/decide" class="flex flex-wrap gap-2 items-center">
+            <%- include('../partials/csrf-field') %>
+            <input type="text" name="note" placeholder="Review note (optional)" class="input-field text-xs py-1.5 w-48" />
+            <select name="decision" class="input-field text-xs py-1.5 w-auto" required>
+              <option value="">Decision...</option>
+              <option value="Approved">Approved</option>
+              <option value="Rejected">Rejected</option>
+              <option value="More Information Required">More Information Required</option>
+            </select>
+            <button type="submit" class="btn-gradient px-4 py-1.5 rounded-lg text-xs font-semibold">Submit Decision</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+</body>
+</html>

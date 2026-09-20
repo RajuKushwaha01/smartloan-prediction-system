@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">Audit Logs</h1>
+  <p class="text-slate-400 mb-8">Record of administrative operations across the system.</p>
+
+  <form method="GET" class="glass-card p-5 rounded-2xl mb-6 flex flex-wrap gap-3">
+    <select name="action" class="input-field w-auto">
+      <option value="all" <%= filters.action==='all'?'selected':'' %>>All Actions</option>
+      <% distinctActions.forEach(a => { %><option value="<%= a %>" <%= filters.action===a?'selected':'' %>><%= a %></option><% }) %>
+    </select>
+    <select name="resource" class="input-field w-auto">
+      <option value="all" <%= filters.resource==='all'?'selected':'' %>>All Resources</option>
+      <% distinctResources.forEach(r => { %><option value="<%= r %>" <%= filters.resource===r?'selected':'' %>><%= r %></option><% }) %>
+    </select>
+    <button type="submit" class="btn-gradient px-5 py-2 rounded-lg text-sm font-semibold">Filter</button>
+  </form>
+
+  <div class="glass-card rounded-2xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-white/5 text-slate-300">
+        <tr><th class="text-left px-6 py-3">Admin</th><th class="text-left px-6 py-3">Action</th><th class="text-left px-6 py-3">Resource</th><th class="text-left px-6 py-3">Change</th><th class="text-left px-6 py-3">IP</th><th class="text-left px-6 py-3">Time</th></tr>
+      </thead>
+      <tbody>
+        <% if (logs.length === 0) { %><tr><td colspan="6" class="text-center py-10 text-slate-400">No audit entries yet.</td></tr><% } %>
+        <% logs.forEach(log => { %>
+          <tr class="border-t border-white/5 hover:bg-white/5 transition">
+            <td class="px-6 py-3 font-medium"><%= log.userName %></td>
+            <td class="px-6 py-3"><%= log.action.replace(/_/g, ' ') %></td>
+            <td class="px-6 py-3"><%= log.resource %></td>
+            <td class="px-6 py-3 text-xs text-slate-400">
+              <% if (log.previousValue !== undefined && log.previousValue !== null) { %>
+                <%= JSON.stringify(log.previousValue) %> → <%= JSON.stringify(log.newValue) %>
+              <% } else { %>—<% } %>
+            </td>
+            <td class="px-6 py-3 text-xs text-slate-500"><%= log.ip %></td>
+            <td class="px-6 py-3 text-xs text-slate-500"><%= new Date(log.timestamp).toLocaleString('en-IN') %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">System Status</h1>
+  <p class="text-slate-400 mb-8">Live health of every service this application depends on.</p>
+
+  <div class="glass-card p-8 rounded-2xl mb-8">
+    <div class="space-y-4">
+      <div class="flex justify-between items-center">
+        <span class="text-sm">Node.js API</span>
+        <span class="status-pill pill-green">✓ Online</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-sm">MongoDB</span>
+        <span class="status-pill <%= dbStatus==='Connected'?'pill-green':'pill-red' %>"><%= dbStatus==='Connected' ? '✓ Connected' : '✕ Disconnected' %></span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-sm">Python ML API</span>
+        <span class="status-pill <%= mlStatus==='Online'?'pill-green':mlStatus==='Degraded'?'pill-amber':'pill-red' %>"><%= mlStatus==='Online' ? '✓ Online' : mlStatus==='Degraded' ? '⚠ Degraded' : '✕ Unavailable' %></span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-sm">Model</span>
+        <span class="status-pill <%= mlHealth && mlHealth.model_loaded ? 'pill-green' : 'pill-red' %>"><%= mlHealth && mlHealth.model_loaded ? '✓ Loaded' : '✕ Not Loaded' %></span>
+      </div>
+    </div>
+
+    <div class="border-t border-white/10 mt-6 pt-6 flex justify-between items-center">
+      <span class="text-sm text-slate-400">Response Time</span>
+      <span class="text-xl font-bold brand-gradient-text"><%= responseTimeMs %>ms</span>
+    </div>
+  </div>
+
+  <% if (mlStatus !== 'Online') { %>
+    <div class="glass-card p-6 rounded-2xl border border-amber-500/30 mb-8">
+      <p class="text-amber-400 font-semibold text-sm mb-1">⚠ ML Service Unavailable</p>
+      <p class="text-xs text-slate-400">AI analysis is temporarily unavailable. Please try again. The rest of the application — browsing, applications, profile, reports — remains fully operational.</p>
+    </div>
+  <% } %>
+
+  <% if (mlHealth) { %>
+    <div class="glass-card p-6 rounded-2xl">
+      <h3 class="font-bold text-sm mb-3">ML Service Details</h3>
+      <div class="grid md:grid-cols-2 gap-3 text-xs">
+        <div><p class="text-slate-400">Status</p><p class="font-semibold"><%= mlHealth.status %></p></div>
+        <div><p class="text-slate-400">Model Version</p><p class="font-semibold"><%= mlHealth.model_version %></p></div>
+      </div>
+    </div>
+  <% } %>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+</body>
+</html>

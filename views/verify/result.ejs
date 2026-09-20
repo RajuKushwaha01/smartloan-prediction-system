@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen flex items-center justify-center px-6">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+
+  <div class="glass-card p-10 rounded-2xl max-w-md w-full text-center glow-border">
+    <% if (found && report.verificationStatus === 'Valid') { %>
+      <div class="text-5xl mb-4">✓</div>
+      <p class="text-lg font-bold text-emerald-400 tracking-wide mb-6">REPORT VERIFIED</p>
+
+      <div class="space-y-3 text-left text-sm mb-6">
+        <div class="flex justify-between"><span class="text-slate-400">Report ID</span><span class="font-semibold"><%= report.reportId %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Application ID</span><span class="font-semibold"><%= report.application.applicationId %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Generated</span><span class="font-semibold"><%= report.generatedAt.toDateString() %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Model Version</span><span class="font-semibold"><%= report.modelVersion %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Status</span><span class="font-semibold text-emerald-400">Valid</span></div>
+      </div>
+
+      <p class="text-xs text-slate-500 break-all">Hash: <%= report.reportHash.substring(0, 24) %>...</p>
+    <% } else if (found && report.verificationStatus === 'Revoked') { %>
+      <div class="text-5xl mb-4">⚠</div>
+      <p class="text-lg font-bold text-amber-400 tracking-wide mb-4">REPORT REVOKED</p>
+      <p class="text-sm text-slate-400">This report (<%= report.reportId %>) has been marked as revoked and is no longer valid.</p>
+    <% } else { %>
+      <div class="text-5xl mb-4">✕</div>
+      <p class="text-lg font-bold text-red-400 tracking-wide mb-4">REPORT NOT FOUND</p>
+      <p class="text-sm text-slate-400">No report matches this ID in our records. It may be invalid or fabricated.</p>
+    <% } %>
+
+    <a href="/" class="text-cyan-400 hover:underline text-sm mt-6 inline-block">← SmartLoan AI Home</a>
+  </div>
+  <script src="/js/background.js"></script>
+</body>
+</html>

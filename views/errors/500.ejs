@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen flex items-center justify-center px-6">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+
+  <div class="glass-card p-12 rounded-2xl text-center max-w-md glow-border">
+    <div class="text-5xl mb-4">⚠</div>
+    <h1 class="text-xl font-bold mb-2">Something Went Wrong</h1>
+    <p class="text-slate-400 text-sm mb-8"><%= message %></p>
+    <div class="flex gap-3 justify-center">
+      <a href="javascript:location.reload()" class="btn-gradient px-6 py-3 rounded-lg font-semibold">Try Again</a>
+      <a href="/" class="px-6 py-3 rounded-lg font-semibold border border-white/20 hover:bg-white/5 transition">Go Home</a>
+    </div>
+  </div>
+  <script src="/js/background.js"></script>
+</body>
+</html>

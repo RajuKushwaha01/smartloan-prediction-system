@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-extrabold tracking-tight mb-1">ML Model Dashboard</h1>
+    <p class="text-slate-400 text-sm">Evaluation report and feature diagnostics for the deployed prediction model.</p>
+  </div>
+
+  <% if (error) { %>
+    <div class="glass-card p-8 rounded-2xl text-center border border-amber-500/20">
+      <p class="text-amber-400 font-medium">⚠ <%= error %></p>
+    </div>
+  <% } else { %>
+
+    <!-- Selected Model Summary Cards (Updated to 5 columns with Feature Version) -->
+    <div class="glass-card p-8 rounded-2xl glow-border mb-8">
+      <div class="grid md:grid-cols-5 gap-6 text-center">
+        <div>
+          <p class="text-slate-400 text-sm mb-1">Selected Model</p>
+          <p class="text-xl font-bold brand-gradient-text"><%= metrics.selected_model %></p>
+        </div>
+        <div>
+          <p class="text-slate-400 text-sm mb-1">Version</p>
+          <p class="text-xl font-bold text-white"><%= metrics.model_version %></p>
+        </div>
+        <div>
+          <p class="text-slate-400 text-sm mb-1">Feature Version</p>
+          <p class="text-xl font-bold text-white"><%= metrics.feature_version || 'v1.2' %></p>
+        </div>
+        <div>
+          <p class="text-slate-400 text-sm mb-1">Trained On</p>
+          <p class="text-xl font-bold text-white"><%= metrics.trained_on_rows %> rows</p>
+        </div>
+        <div>
+          <p class="text-slate-400 text-sm mb-1">Training Date</p>
+          <p class="text-xl font-bold text-white"><%= new Date().toLocaleDateString('en-GB') %></p>
+        </div>
+      </div>
+      <p class="text-xs text-slate-500 text-center mt-4">Selection metric: <span class="text-slate-400"><%= metrics.selection_metric %></span></p>
+    </div>
+
+    <!-- Selected Model Metrics Grid -->
+    <h2 class="font-bold text-lg mb-4 text-white">Selected Model Performance</h2>
+    <div class="grid md:grid-cols-5 gap-4 mb-8">
+      <% const m = metrics.selected_model_metrics; %>
+      <div class="glass-card p-5 rounded-xl text-center border border-white/10">
+        <p class="text-2xl font-extrabold text-emerald-400"><%= (m.accuracy * 100).toFixed(2) %>%</p>
+        <p class="text-xs text-slate-400 mt-1">Accuracy</p>
+      </div>
+      <div class="glass-card p-5 rounded-xl text-center border border-white/10">
+        <p class="text-2xl font-extrabold text-cyan-400"><%= (m.precision * 100).toFixed(2) %>%</p>
+        <p class="text-xs text-slate-400 mt-1">Precision</p>
+      </div>
+      <div class="glass-card p-5 rounded-xl text-center border border-white/10">
+        <p class="text-2xl font-extrabold text-violet-400"><%= (m.recall * 100).toFixed(2) %>%</p>
+        <p class="text-xs text-slate-400 mt-1">Recall</p>
+      </div>
+      <div class="glass-card p-5 rounded-xl text-center border border-white/10">
+        <p class="text-2xl font-extrabold text-blue-400"><%= (m.f1_score * 100).toFixed(2) %>%</p>
+        <p class="text-xs text-slate-400 mt-1">F1 Score</p>
+      </div>
+      <div class="glass-card p-5 rounded-xl text-center border border-white/10">
+        <p class="text-2xl font-extrabold text-amber-400"><%= (m.roc_auc * 100).toFixed(2) %>%</p>
+        <p class="text-xs text-slate-400 mt-1">ROC-AUC</p>
+      </div>
+    </div>
+
+    <!-- Confusion Matrix -->
+    <div class="glass-card p-8 rounded-2xl mb-8 border border-white/10">
+      <h2 class="font-bold text-lg mb-4 text-white">Confusion Matrix</h2>
+      <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto text-center text-sm">
+        <div class="bg-emerald-500/15 border border-emerald-500/30 rounded-xl p-4">
+          <p class="text-2xl font-bold text-emerald-400"><%= m.confusion_matrix[0][0] %></p>
+          <p class="text-xs text-slate-400 mt-1">True Negative</p>
+        </div>
+        <div class="bg-red-500/15 border border-red-500/30 rounded-xl p-4">
+          <p class="text-2xl font-bold text-red-400"><%= m.confusion_matrix[0][1] %></p>
+          <p class="text-xs text-slate-400 mt-1">False Positive</p>
+        </div>
+        <div class="bg-red-500/15 border border-red-500/30 rounded-xl p-4">
+          <p class="text-2xl font-bold text-red-400"><%= m.confusion_matrix[1][0] %></p>
+          <p class="text-xs text-slate-400 mt-1">False Negative</p>
+        </div>
+        <div class="bg-emerald-500/15 border border-emerald-500/30 rounded-xl p-4">
+          <p class="text-2xl font-bold text-emerald-400"><%= m.confusion_matrix[1][1] %></p>
+          <p class="text-xs text-slate-400 mt-1">True Positive</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- All Models Comparison -->
+    <h2 class="font-bold text-lg mb-4 text-white">All Models Compared</h2>
+    <div class="glass-card rounded-2xl overflow-hidden mb-8 border border-white/10">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+          <thead class="bg-white/5 text-slate-300 font-semibold border-b border-white/10">
+            <tr>
+              <th class="px-6 py-3.5">Model</th>
+              <th class="px-6 py-3.5">Accuracy</th>
+              <th class="px-6 py-3.5">Precision</th>
+              <th class="px-6 py-3.5">Recall</th>
+              <th class="px-6 py-3.5">F1</th>
+              <th class="px-6 py-3.5">ROC-AUC</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5 text-slate-200">
+            <% Object.entries(metrics.all_models).forEach(([name, stats]) => { %>
+              <tr class="hover:bg-white/[0.02] transition-colors <%= name === metrics.selected_model ? 'bg-cyan-400/5' : '' %>">
+                <td class="px-6 py-4 font-medium text-white flex items-center gap-2">
+                  <span><%= name %></span>
+                  <% if (name === metrics.selected_model) { %>
+                    <span class="text-xs bg-cyan-400/20 text-cyan-300 border border-cyan-400/30 px-2 py-0.5 rounded-full font-semibold">★ Active</span>
+                  <% } %>
+                </td>
+                <td class="px-6 py-4"><%= (stats.accuracy * 100).toFixed(2) %>%</td>
+                <td class="px-6 py-4"><%= (stats.precision * 100).toFixed(2) %>%</td>
+                <td class="px-6 py-4"><%= (stats.recall * 100).toFixed(2) %>%</td>
+                <td class="px-6 py-4"><%= (stats.f1_score * 100).toFixed(2) %>%</td>
+                <td class="px-6 py-4"><%= (stats.roc_auc * 100).toFixed(2) %>%</td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Global Feature Importance -->
+    <% if (metrics.feature_importance_global && metrics.feature_importance_global.length > 0) { %>
+      <div class="glass-card p-8 rounded-2xl mb-8 border border-white/10">
+        <h2 class="font-bold text-lg mb-6 text-white">Global Feature Importance</h2>
+        <div class="space-y-4">
+          <% metrics.feature_importance_global.forEach(f => { %>
+            <div>
+              <div class="flex justify-between text-sm mb-1.5">
+                <span class="capitalize text-slate-200"><%= f.feature.replace(/_/g, ' ') %></span>
+                <span class="text-slate-400 font-mono"><%= (f.importance * 100).toFixed(1) %>%</span>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                <div class="h-2 btn-gradient rounded-full transition-all duration-500" style="width: <%= Math.min(100, f.importance * 100 * 4) %>%"></div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Diagnostics Note -->
+    <% if (metrics.note) { %>
+      <div class="glass-card p-6 rounded-2xl border border-amber-500/20">
+        <p class="text-xs text-amber-400 flex items-center gap-2">
+          <span>⚠</span>
+          <span><%= metrics.note %></span>
+        </p>
+      </div>
+    <% } %>
+
+  <% } %>
+
+  <%- include('../partials/admin-sidebar-end') %>
+
+  <!-- External Scripts -->
+  <script src="/js/background.js"></script>
+</body>
+</html>

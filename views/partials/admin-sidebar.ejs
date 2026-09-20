@@ -1,0 +1,125 @@
+<div class="flex min-h-screen">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="hidden lg:flex flex-col w-64 fixed left-0 top-0 h-screen glass-card rounded-none border-r border-white/10 z-40 px-5 py-6 overflow-y-auto">
+    <a href="/" class="flex items-center gap-2 font-extrabold text-lg brand-gradient-text mb-8 px-2">
+      <span class="logo-dot"></span> SMARTLOAN AI
+    </a>
+
+    <nav class="flex-1 space-y-1 text-sm">
+      <a href="/admin/dashboard" class="sidebar-link <%= active === 'dashboard' ? 'sidebar-active' : '' %>">
+        <span>⌂</span> Dashboard
+      </a>
+      <a href="/admin/applications" class="sidebar-link <%= active === 'applications' ? 'sidebar-active' : '' %>">
+        <span>▣</span> Applications
+      </a>
+      <a href="/admin/users" class="sidebar-link <%= active === 'users' ? 'sidebar-active' : '' %>">
+        <span>◉</span> Users
+      </a>
+      <a href="/admin/predictions" class="sidebar-link <%= active === 'predictions' ? 'sidebar-active' : '' %>">
+        <span>◈</span> Predictions
+      </a>
+      <a href="/admin/review-queue" class="sidebar-link <%= active === 'review' ? 'sidebar-active' : '' %>">
+        <span>🧑‍⚖️</span> Review Queue
+      </a>
+      <a href="/admin/analytics" class="sidebar-link <%= active === 'analytics' ? 'sidebar-active' : '' %>">
+        <span>▤</span> Analytics
+      </a>
+
+      <!-- Machine Learning Section -->
+      <p class="text-[10px] uppercase tracking-wider text-slate-500 px-3 pt-4 pb-1">Machine Learning</p>
+      <a href="/admin/prediction-monitoring" class="sidebar-link <%= active === 'predictions-monitor' ? 'sidebar-active' : '' %>">
+        <span>📡</span> Prediction Monitor
+      </a>
+      <a href="/admin/model-lab" class="sidebar-link <%= active === 'model-lab' ? 'sidebar-active' : '' %>">
+        <span>🧪</span> Model Lab
+      </a>
+      <a href="/admin/model-registry" class="sidebar-link <%= active === 'registry' ? 'sidebar-active' : '' %>">
+        <span>🗄</span> Model Registry
+      </a>
+      <a href="/admin/dataset-management" class="sidebar-link <%= active === 'datasets' ? 'sidebar-active' : '' %>">
+        <span>🗂</span> Datasets
+      </a>
+      <a href="/admin/experiment-tracking" class="sidebar-link <%= active === 'experiments' ? 'sidebar-active' : '' %>">
+        <span>🔬</span> Experiments
+      </a>
+      <a href="/admin/retraining" class="sidebar-link <%= active === 'retraining' ? 'sidebar-active' : '' %>">
+        <span>🔁</span> Retraining
+      </a>
+      <a href="/admin/fairness" class="sidebar-link <%= active === 'fairness' ? 'sidebar-active' : '' %>">
+        <span>⚖️</span> Fairness
+      </a>
+      <a href="/admin/explainability" class="sidebar-link <%= active === 'explainability' ? 'sidebar-active' : '' %>">
+        <span>🔍</span> Explainability
+      </a>
+
+      <!-- System Section -->
+      <p class="text-[10px] uppercase tracking-wider text-slate-500 px-3 pt-4 pb-1">System</p>
+      <a href="/admin/reports" class="sidebar-link <%= active === 'reports' ? 'sidebar-active' : '' %>">
+        <span>📄</span> Reports
+      </a>
+      <a href="/admin/audit-logs" class="sidebar-link <%= active === 'audit' ? 'sidebar-active' : '' %>">
+        <span>📜</span> Audit Logs
+      </a>
+      <a href="/admin/security" class="sidebar-link <%= active === 'security' ? 'sidebar-active' : '' %>">
+        <span>🛡</span> Security
+      </a>
+      <a href="/admin/system-health" class="sidebar-link <%= active === 'health' ? 'sidebar-active' : '' %>">
+        <span>💓</span> System Health
+      </a>
+      <a href="/admin/settings" class="sidebar-link <%= active === 'settings' ? 'sidebar-active' : '' %>">
+        <span>⚙</span> Settings
+      </a>
+    </nav>
+
+    <div class="border-t border-white/10 pt-4 mt-4">
+      <a href="/auth/logout" class="sidebar-link text-red-400">
+        <span>↪</span> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- ============ MOBILE TOP BAR ============ -->
+  <div class="lg:hidden fixed top-0 left-0 w-full z-40 glass-card rounded-none border-b border-white/10 px-4 py-3 flex justify-between items-center">
+    <a href="/" class="font-extrabold text-sm brand-gradient-text">SMARTLOAN AI</a>
+    <button id="admin-mobile-toggle" class="text-white p-1">☰</button>
+  </div>
+  
+  <!-- ============ MOBILE MENU ============ -->
+  <div id="admin-mobile-menu" class="hidden lg:hidden fixed top-12 left-0 w-full z-40 glass-card rounded-none border-b border-white/10 px-4 py-3 space-y-1 max-h-[70vh] overflow-y-auto text-sm">
+    <a href="/admin/dashboard" class="sidebar-link">⌂ Dashboard</a>
+    <a href="/admin/applications" class="sidebar-link">▣ Applications</a>
+    <a href="/admin/users" class="sidebar-link">◉ Users</a>
+    <a href="/admin/predictions" class="sidebar-link">◈ Predictions</a>
+    <a href="/admin/review-queue" class="sidebar-link">🧑‍⚖️ Review Queue</a>
+    <a href="/admin/analytics" class="sidebar-link">▤ Analytics</a>
+    
+    <p class="text-[10px] uppercase tracking-wider text-slate-500 px-2 pt-2">Machine Learning</p>
+    <a href="/admin/prediction-monitoring" class="sidebar-link">📡 Prediction Monitor</a>
+    <a href="/admin/model-lab" class="sidebar-link">🧪 Model Lab</a>
+    <a href="/admin/model-registry" class="sidebar-link">🗄 Model Registry</a>
+    <a href="/admin/dataset-management" class="sidebar-link">🗂 Datasets</a>
+    <a href="/admin/experiment-tracking" class="sidebar-link">🔬 Experiments</a>
+    <a href="/admin/retraining" class="sidebar-link">🔁 Retraining</a>
+    <a href="/admin/fairness" class="sidebar-link">⚖️ Fairness</a>
+    <a href="/admin/explainability" class="sidebar-link">🔍 Explainability</a>
+
+    <p class="text-[10px] uppercase tracking-wider text-slate-500 px-2 pt-2">System</p>
+    <a href="/admin/reports" class="sidebar-link">📄 Reports</a>
+    <a href="/admin/audit-logs" class="sidebar-link">📜 Audit Logs</a>
+    <a href="/admin/security" class="sidebar-link">🛡 Security</a>
+    <a href="/admin/system-health" class="sidebar-link">💓 System Health</a>
+    <a href="/admin/settings" class="sidebar-link">⚙ Settings</a>
+    
+    <div class="border-t border-white/10 pt-2 mt-2">
+      <a href="/auth/logout" class="sidebar-link text-red-400">↪ Logout</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('admin-mobile-toggle').addEventListener('click', () => {
+      document.getElementById('admin-mobile-menu').classList.toggle('hidden');
+    });
+  </script>
+
+  <!-- ============ MAIN CONTENT WRAPPER ============ -->
+  <main class="flex-1 lg:ml-64 pt-16 lg:pt-8 px-6 lg:px-10 pb-16">

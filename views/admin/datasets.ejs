@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">Datasets</h1>
+  <p class="text-slate-400 mb-8">Details of the dataset used to train the currently deployed model.</p>
+
+  <% if (error) { %>
+    <div class="glass-card p-8 rounded-2xl text-center"><p class="text-amber-400">⚠ <%= error %></p></div>
+  <% } else { %>
+    <div class="glass-card p-8 rounded-2xl mb-8">
+      <div class="grid md:grid-cols-3 gap-6 text-center">
+        <div><p class="text-slate-400 text-sm mb-1">Total Rows</p><p class="text-2xl font-bold brand-gradient-text"><%= metrics.trained_on_rows %></p></div>
+        <div><p class="text-slate-400 text-sm mb-1">Train / Test Split</p><p class="text-2xl font-bold"><%= metrics.train_test_split.train %> / <%= metrics.train_test_split.test %></p></div>
+        <div><p class="text-slate-400 text-sm mb-1">Feature Version</p><p class="text-2xl font-bold"><%= metrics.feature_version || 'v1.2' %></p></div>
+      </div>
+    </div>
+
+    <div class="glass-card p-8 rounded-2xl mb-8">
+      <h3 class="font-bold mb-4 text-sm">Class Distribution (Loan_Status)</h3>
+      <div class="flex gap-6">
+        <% Object.entries(metrics.class_distribution).forEach(([label, count]) => { %>
+          <div><p class="text-2xl font-bold"><%= count %></p><p class="text-xs text-slate-400"><%= label === 'Y' ? 'Approved (Y)' : 'Not Approved (N)' %></p></div>
+        <% }) %>
+      </div>
+    </div>
+
+    <% if (metrics.feature_columns) { %>
+      <div class="glass-card p-8 rounded-2xl">
+        <h3 class="font-bold mb-4 text-sm">Feature Columns Used</h3>
+        <div class="flex flex-wrap gap-2">
+          <% metrics.feature_columns.forEach(col => { %>
+            <span class="text-xs bg-white/5 border border-white/10 rounded-full px-3 py-1"><%= col %></span>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+  <% } %>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+</body>
+</html>

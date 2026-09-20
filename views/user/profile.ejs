@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/navbar') %>
+
+  <div class="max-w-2xl mx-auto px-6 pt-28 pb-16">
+    <h1 class="text-2xl font-bold mb-6">My Profile</h1>
+
+    <% if (typeof updated !== 'undefined' && updated) { %>
+      <div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-sm px-4 py-2 rounded-lg mb-6">✓ Profile updated successfully.</div>
+    <% } %>
+    <% if (typeof pwUpdated !== 'undefined' && pwUpdated) { %>
+      <div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-sm px-4 py-2 rounded-lg mb-6">✓ Password changed successfully.</div>
+    <% } %>
+    <% if (typeof pwError !== 'undefined' && pwError) { %>
+      <div class="bg-red-500/10 border border-red-500/40 text-red-300 text-sm px-4 py-2 rounded-lg mb-6">
+        ⚠ <%= pwError === 'current' ? 'Current password is incorrect.' : pwError === 'match' ? 'New passwords do not match.' : pwError === 'length' ? 'New password must be at least 6 characters.' : 'Something went wrong.' %>
+      </div>
+    <% } %>
+
+    <!-- Profile Picture -->
+    <div class="glass-card p-8 rounded-2xl glow-border mb-6 text-center">
+      <% if (profileUser.profilePicture) { %>
+        <img src="<%= profileUser.profilePicture %>" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-2 border-cyan-400/40" />
+      <% } else { %>
+        <div class="w-24 h-24 rounded-full btn-gradient mx-auto flex items-center justify-center text-3xl font-bold mb-4">
+          <%= profileUser.fullName.charAt(0).toUpperCase() %>
+        </div>
+      <% } %>
+      <h2 class="text-xl font-bold"><%= profileUser.fullName %></h2>
+      <p class="text-slate-400 text-sm mb-4"><%= profileUser.email %></p>
+
+      <form method="POST" action="/loan/profile/picture" enctype="multipart/form-data" class="flex items-center justify-center gap-3">
+        <%- include('../partials/csrf-field') %>
+        <input type="file" name="profilePicture" accept="image/jpeg,image/png,image/webp" class="text-xs text-slate-400" required />
+        <button type="submit" class="btn-gradient px-4 py-2 rounded-lg text-xs font-semibold">Upload</button>
+      </form>
+    </div>
+
+    <!-- Account Info -->
+    <form method="POST" action="/loan/profile/update" class="glass-card p-8 rounded-2xl mb-6 space-y-4">
+      <%- include('../partials/csrf-field') %>
+      <h3 class="font-bold text-lg mb-2">Account Information</h3>
+      <div>
+        <label class="text-sm text-slate-300">Full Name</label>
+        <input type="text" name="fullName" value="<%= profileUser.fullName %>" required class="input-field" />
+      </div>
+      <div>
+        <label class="text-sm text-slate-300">Phone</label>
+        <input type="text" name="phone" value="<%= profileUser.phone || '' %>" class="input-field" />
+      </div>
+      <div>
+        <label class="text-sm text-slate-300">Address</label>
+        <input type="text" name="address" value="<%= profileUser.address || '' %>" class="input-field" />
+      </div>
+
+      <!-- City, State, Pincode -->
+      <div class="grid grid-cols-3 gap-3">
+        <div><label class="text-sm text-slate-300">City</label><input type="text" name="city" value="<%= profileUser.city || '' %>" class="input-field" /></div>
+        <div><label class="text-sm text-slate-300">State</label><input type="text" name="state" value="<%= profileUser.state || '' %>" class="input-field" /></div>
+        <div><label class="text-sm text-slate-300">Pincode</label><input type="text" name="pincode" value="<%= profileUser.pincode || '' %>" class="input-field" /></div>
+      </div>
+
+      <h3 class="font-bold text-sm mb-2 mt-6 text-slate-300">Preferences</h3>
+      <label class="flex items-center gap-2 text-sm text-slate-300">
+        <input type="checkbox" name="emailNotifications" <%= profileUser.preferences.emailNotifications ? 'checked' : '' %> class="accent-cyan-400" />
+        Email notifications
+      </label>
+      <label class="flex items-center gap-2 text-sm text-slate-300">
+        <input type="checkbox" name="darkMode" <%= profileUser.preferences.darkMode ? 'checked' : '' %> class="accent-cyan-400" />
+        Dark mode
+      </label>
+
+      <button type="submit" class="btn-gradient px-6 py-3 rounded-lg font-semibold mt-2">Save Changes</button>
+    </form>
+
+    <!-- Change Password -->
+    <form method="POST" action="/loan/profile/password" class="glass-card p-8 rounded-2xl mb-6 space-y-4">
+      <%- include('../partials/csrf-field') %>
+      <h3 class="font-bold text-lg mb-2">Change Password</h3>
+      <div>
+        <label class="text-sm text-slate-300">Current Password</label>
+        <input type="password" name="currentPassword" required class="input-field" />
+      </div>
+      <div>
+        <label class="text-sm text-slate-300">New Password</label>
+        <input type="password" name="newPassword" required class="input-field" />
+      </div>
+      <div>
+        <label class="text-sm text-slate-300">Confirm New Password</label>
+        <input type="password" name="confirmNewPassword" required class="input-field" />
+      </div>
+      <button type="submit" class="btn-gradient px-6 py-3 rounded-lg font-semibold mt-2">Update Password</button>
+    </form>
+
+    <div class="glass-card p-6 rounded-2xl grid grid-cols-2 gap-4 text-sm">
+      <div><p class="text-slate-400">Total Applications</p><p class="font-semibold"><%= totalApplications %></p></div>
+      <div><p class="text-slate-400">Member Since</p><p class="font-semibold"><%= profileUser.createdAt.toDateString() %></p></div>
+      <div><p class="text-slate-400">Account Type</p><p class="font-semibold capitalize"><%= profileUser.role %></p></div>
+      <div><p class="text-slate-400">Account Status</p><p class="font-semibold text-emerald-400"><%= profileUser.accountStatus %></p></div>
+    </div>
+  </div>
+  <script src="/js/background.js"></script>
+</body>
+</html>

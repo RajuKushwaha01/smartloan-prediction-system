@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">Analytics</h1>
+  <p class="text-slate-400 mb-8">System-wide KPIs and trends, filterable by any combination below.</p>
+
+  <!-- FILTERS -->
+  <form method="GET" class="glass-card p-5 rounded-2xl mb-6 grid md:grid-cols-4 gap-3">
+    <div>
+      <label class="text-xs text-slate-400">From</label>
+      <input type="date" name="dateFrom" value="<%= filters.dateFrom %>" class="input-field" />
+    </div>
+    <div>
+      <label class="text-xs text-slate-400">To</label>
+      <input type="date" name="dateTo" value="<%= filters.dateTo %>" class="input-field" />
+    </div>
+    <div>
+      <label class="text-xs text-slate-400">Loan Type</label>
+      <select name="loanPurpose" class="input-field">
+        <option value="all">All</option>
+        <% distinctPurposes.forEach(p => { %>
+          <option value="<%= p %>" <%= filters.loanPurpose===p?'selected':'' %>><%= p %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div>
+      <label class="text-xs text-slate-400">Employment Type</label>
+      <select name="employmentType" class="input-field">
+        <option value="all">All</option>
+        <% distinctEmploymentTypes.forEach(e => { %>
+          <option value="<%= e %>" <%= filters.employmentType===e?'selected':'' %>><%= e %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div>
+      <label class="text-xs text-slate-400">Prediction</label>
+      <select name="predictionFilter" class="input-field">
+        <option value="all">All</option>
+        <option value="Eligible" <%= filters.predictionFilter==='Eligible'?'selected':'' %>>Eligible</option>
+        <option value="Review" <%= filters.predictionFilter==='Review'?'selected':'' %>>Review</option>
+        <option value="Not Eligible" <%= filters.predictionFilter==='Not Eligible'?'selected':'' %>>Not Eligible</option>
+      </select>
+    </div>
+    <div>
+      <label class="text-xs text-slate-400">Status</label>
+      <select name="status" class="input-field">
+        <option value="all">All</option>
+        <option value="Pending" <%= filters.status==='Pending'?'selected':'' %>>Pending</option>
+        <option value="Analyzed" <%= filters.status==='Analyzed'?'selected':'' %>>Analyzed</option>
+      </select>
+    </div>
+    <div>
+      <label class="text-xs text-slate-400">Min Income</label>
+      <input type="number" name="minIncome" value="<%= filters.minIncome %>" class="input-field" />
+    </div>
+    <div>
+      <label class="text-xs text-slate-400">Max Income</label>
+      <input type="number" name="maxIncome" value="<%= filters.maxIncome %>" class="input-field" />
+    </div>
+    <div>
+      <label class="text-xs text-slate-400">Min Loan</label>
+      <input type="number" name="minLoan" value="<%= filters.minLoan %>" class="input-field" />
+    </div>
+    <div>
+      <label class="text-xs text-slate-400">Max Loan</label>
+      <input type="number" name="maxLoan" value="<%= filters.maxLoan %>" class="input-field" />
+    </div>
+    <div class="md:col-span-4 flex gap-3">
+      <button type="submit" class="btn-gradient px-6 py-2.5 rounded-lg font-semibold text-sm">🔍 Apply Filters</button>
+      <a href="/admin/analytics" class="px-6 py-2.5 rounded-lg font-semibold text-sm border border-white/20 hover:bg-white/5 transition">Reset</a>
+    </div>
+  </form>
+
+  <!-- KPIs -->
+  <div class="grid md:grid-cols-6 gap-4 mb-8">
+    <div class="glass-card p-5 rounded-2xl text-center">
+      <p class="text-2xl font-extrabold brand-gradient-text"><%= kpis.totalApplications %></p>
+      <p class="text-xs text-slate-400 mt-1">Total Applications</p>
+    </div>
+    <div class="glass-card p-5 rounded-2xl text-center">
+      <p class="text-2xl font-extrabold"><%= kpis.applicationsToday %></p>
+      <p class="text-xs text-slate-400 mt-1">Today</p>
+    </div>
+    <div class="glass-card p-5 rounded-2xl text-center">
+      <p class="text-2xl font-extrabold"><%= kpis.applicationsThisMonth %></p>
+      <p class="text-xs text-slate-400 mt-1">This Month</p>
+    </div>
+    <div class="glass-card p-5 rounded-2xl text-center">
+      <p class="text-2xl font-extrabold text-emerald-400"><%= kpis.predictionRate %>%</p>
+      <p class="text-xs text-slate-400 mt-1">Prediction Rate</p>
+    </div>
+    <div class="glass-card p-5 rounded-2xl text-center">
+      <p class="text-2xl font-extrabold text-amber-400"><%= kpis.manualReviewRate %>%</p>
+      <p class="text-xs text-slate-400 mt-1">Manual Review Rate</p>
+    </div>
+    <div class="glass-card p-5 rounded-2xl text-center">
+      <p class="text-2xl font-extrabold text-cyan-400"><%= kpis.avgProcessingSeconds %>s</p>
+      <p class="text-xs text-slate-400 mt-1">Avg Processing Time</p>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="glass-card p-6 rounded-2xl mb-8">
+    <h2 class="font-bold mb-4">Application Trend (Last 6 Months)</h2>
+    <canvas id="trendChart" height="80"></canvas>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <div class="glass-card p-6 rounded-2xl">
+      <h2 class="font-bold mb-4">Prediction Distribution</h2>
+      <canvas id="distChart" height="200"></canvas>
+    </div>
+    <div class="glass-card p-6 rounded-2xl">
+      <h2 class="font-bold mb-4">Loan Amount Distribution</h2>
+      <canvas id="loanChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="glass-card p-6 rounded-2xl mb-8">
+    <h2 class="font-bold mb-4">Income Distribution</h2>
+    <canvas id="incomeChart" height="90"></canvas>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <div class="glass-card p-6 rounded-2xl text-center">
+      <p class="text-3xl font-extrabold brand-gradient-text"><%= completionRate %>%</p>
+      <p class="text-xs text-slate-400 mt-1">Completion Rate</p>
+    </div>
+    <div class="glass-card p-6 rounded-2xl text-center">
+      <p class="text-3xl font-extrabold text-amber-400"><%= reviewRatePct %>%</p>
+      <p class="text-xs text-slate-400 mt-1">Review Rate</p>
+    </div>
+  </div>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+  <script>
+    Chart.defaults.color = '#94A3B8';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+    new Chart(document.getElementById('trendChart'), {
+      type: 'line',
+      data: {
+        labels: <%- JSON.stringify(monthlyTrend.map(m => m.month)) %>,
+        datasets: [{
+          label: 'Applications',
+          data: <%- JSON.stringify(monthlyTrend.map(m => m.count)) %>,
+          borderColor: '#06B6D4',
+          backgroundColor: 'rgba(6,182,212,0.15)',
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#7C3AED'
+        }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+
+    new Chart(document.getElementById('distChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Eligible', 'Review', 'Not Eligible'],
+        datasets: [{
+          data: [<%= eligible %>, <%= review %>, <%= notEligible %>],
+          backgroundColor: ['#10B981', '#F59E0B', '#EF4444']
+        }]
+      }
+    });
+
+    new Chart(document.getElementById('loanChart'), {
+      type: 'bar',
+      data: {
+        labels: <%- JSON.stringify(Object.keys(loanBuckets)) %>,
+        datasets: [{
+          label: 'Applications',
+          data: <%- JSON.stringify(Object.values(loanBuckets)) %>,
+          backgroundColor: '#2563EB',
+          borderRadius: 6
+        }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+
+    new Chart(document.getElementById('incomeChart'), {
+      type: 'bar',
+      data: {
+        labels: <%- JSON.stringify(Object.keys(incomeBuckets)) %>,
+        datasets: [{
+          label: 'Applicants',
+          data: <%- JSON.stringify(Object.values(incomeBuckets)) %>,
+          backgroundColor: '#7C3AED',
+          borderRadius: 6
+        }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+  </script>
+</body>
+</html>

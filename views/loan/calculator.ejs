@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/navbar') %>
+
+  <div class="max-w-3xl mx-auto px-6 pt-28 pb-16">
+    <h1 class="text-2xl font-bold mb-1">EMI Calculator</h1>
+    <p class="text-slate-400 text-sm mb-8">Estimate your monthly repayment before applying.</p>
+
+    <div class="glass-card p-8 rounded-2xl glow-border">
+      <div class="space-y-8">
+        <div>
+          <div class="flex justify-between mb-2"><label class="text-sm font-semibold">Loan Amount</label><span id="amount-display" class="text-sm font-bold brand-gradient-text">₹5,00,000</span></div>
+          <input type="range" id="amount-slider" min="100000" max="5000000" step="10000" value="500000" class="w-full accent-cyan-400" />
+          <div class="flex justify-between text-xs text-slate-500 mt-1"><span>₹1L</span><span>₹50L</span></div>
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-2"><label class="text-sm font-semibold">Interest Rate</label><span id="rate-display" class="text-sm font-bold brand-gradient-text">10.5%</span></div>
+          <input type="range" id="rate-slider" min="5" max="20" step="0.1" value="10.5" class="w-full accent-cyan-400" />
+          <div class="flex justify-between text-xs text-slate-500 mt-1"><span>5%</span><span>20%</span></div>
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-2"><label class="text-sm font-semibold">Tenure</label><span id="tenure-display" class="text-sm font-bold brand-gradient-text">60 months</span></div>
+          <input type="range" id="tenure-slider" min="12" max="120" step="1" value="60" class="w-full accent-cyan-400" />
+          <div class="flex justify-between text-xs text-slate-500 mt-1"><span>12</span><span>120 months</span></div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4 mt-10">
+        <div class="glass-card p-5 rounded-xl text-center"><p class="text-xs text-slate-400 mb-1">Monthly EMI</p><p id="emi-result" class="text-2xl font-extrabold brand-gradient-text">₹0</p></div>
+        <div class="glass-card p-5 rounded-xl text-center"><p class="text-xs text-slate-400 mb-1">Total Interest</p><p id="interest-result" class="text-2xl font-extrabold text-amber-400">₹0</p></div>
+        <div class="glass-card p-5 rounded-xl text-center"><p class="text-xs text-slate-400 mb-1">Total Repayment</p><p id="total-result" class="text-2xl font-extrabold text-cyan-400">₹0</p></div>
+      </div>
+
+      <p class="text-xs text-slate-500 mt-6 text-center">This calculator provides an estimate only. Actual EMI depends on the lender's terms.</p>
+
+      <div class="text-center mt-6">
+        <a href="/loan/apply" class="btn-gradient px-6 py-3 rounded-lg font-semibold inline-block">Apply for This Loan →</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/background.js"></script>
+  <script src="/js/calculator.js"></script>
+</body>
+</html>

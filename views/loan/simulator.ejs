@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/navbar') %>
+
+  <div class="max-w-5xl mx-auto px-6 pt-28 pb-16">
+    <h1 class="text-2xl font-bold mb-1">What-If Simulator</h1>
+    <p class="text-slate-400 text-sm mb-8">Test different scenarios against the model. Every simulation is a model scenario, not a guarantee of lender behaviour.</p>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <!-- CURRENT -->
+      <div class="glass-card p-6 rounded-2xl">
+        <p class="text-meta text-slate-400 mb-4">CURRENT</p>
+        <div class="space-y-2 text-sm mb-4">
+          <div class="flex justify-between"><span class="text-slate-400">Loan Amount</span><span class="font-semibold">₹<%= application.loanAmount.toLocaleString('en-IN') %></span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Tenure</span><span class="font-semibold"><%= application.loanTenure %> months</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">DTI</span><span class="font-semibold"><%= application.debtToIncomeRatio %>%</span></div>
+        </div>
+        <div class="border-t border-white/10 pt-4">
+          <p class="text-xs text-slate-400 mb-1">Prediction</p>
+          <p class="text-xl font-bold"><span class="status-pill <%= prediction.prediction==='Eligible'?'pill-green':prediction.prediction==='Review'?'pill-amber':'pill-red' %>"><%= prediction.prediction %></span></p>
+          <p class="text-xs text-slate-400 mt-2">Probability: <span class="font-semibold text-white"><%= Math.round(prediction.probability*100) %>%</span></p>
+        </div>
+      </div>
+
+      <!-- SIMULATION -->
+      <div class="glass-card p-6 rounded-2xl glow-border">
+        <p class="text-meta text-cyan-400 mb-4">SIMULATION</p>
+        <div id="sim-result" class="space-y-2 text-sm mb-4">
+          <p class="text-slate-500 text-xs">Adjust the inputs below and click "Run Simulation" to see results.</p>
+        </div>
+        <div id="sim-output" class="hidden border-t border-white/10 pt-4">
+          <p class="text-xs text-slate-400 mb-1">Prediction</p>
+          <p class="text-xl font-bold"><span id="sim-prediction-pill" class="status-pill"></span></p>
+          <p class="text-xs text-slate-400 mt-2">Probability: <span id="sim-probability" class="font-semibold text-white"></span></p>
+          <p class="text-xs text-slate-400 mt-1">EMI: <span id="sim-emi" class="font-semibold text-white"></span></p>
+          <p class="text-xs text-slate-400 mt-1">DTI: <span id="sim-dti" class="font-semibold text-white"></span></p>
+          <p id="sim-interpretation" class="text-xs text-slate-500 italic mt-3"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIMULATOR CONTROLS -->
+    <div class="glass-card p-8 rounded-2xl mb-8">
+      <h2 class="font-bold text-lg mb-6">Adjust Scenario</h2>
+      <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm">Loan Amount</label><span id="sim-loanAmount-display" class="text-sm font-bold brand-gradient-text">₹<%= application.loanAmount.toLocaleString('en-IN') %></span></div>
+          <input type="range" id="sim-loanAmount" min="50000" max="5000000" step="10000" value="<%= application.loanAmount %>" class="w-full accent-cyan-400" />
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm">Monthly Income</label><span id="sim-monthlyIncome-display" class="text-sm font-bold brand-gradient-text">₹<%= Math.round(application.monthlyIncome).toLocaleString('en-IN') %></span></div>
+          <input type="range" id="sim-monthlyIncome" min="10000" max="500000" step="1000" value="<%= Math.round(application.monthlyIncome) %>" class="w-full accent-cyan-400" />
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm">Monthly Expenses</label><span id="sim-monthlyExpenses-display" class="text-sm font-bold brand-gradient-text">₹<%= application.monthlyExpenses.toLocaleString('en-IN') %></span></div>
+          <input type="range" id="sim-monthlyExpenses" min="0" max="200000" step="1000" value="<%= application.monthlyExpenses %>" class="w-full accent-cyan-400" />
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm">Loan Tenure</label><span id="sim-loanTenure-display" class="text-sm font-bold brand-gradient-text"><%= application.loanTenure %> months</span></div>
+          <input type="range" id="sim-loanTenure" min="12" max="240" step="12" value="<%= application.loanTenure %>" class="w-full accent-cyan-400" />
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm">Co-Applicant Income</label><span id="sim-coApplicantIncome-display" class="text-sm font-bold brand-gradient-text">₹<%= Math.round(application.coApplicantIncome || 0).toLocaleString('en-IN') %></span></div>
+          <input type="range" id="sim-coApplicantIncome" min="0" max="200000" step="1000" value="<%= Math.round(application.coApplicantIncome || 0) %>" class="w-full accent-cyan-400" />
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm">Existing EMI</label><span id="sim-existingEMI-display" class="text-sm font-bold brand-gradient-text">₹<%= Math.round(application.existingEMI || 0).toLocaleString('en-IN') %></span></div>
+          <input type="range" id="sim-existingEMI" min="0" max="100000" step="500" value="<%= Math.round(application.existingEMI || 0) %>" class="w-full accent-cyan-400" />
+        </div>
+        <div>
+          <label class="text-sm block mb-1">Employment Status</label>
+          <select id="sim-employmentType" class="input-field">
+            <option <%= application.employmentType==='Salaried'?'selected':'' %>>Salaried</option>
+            <option <%= application.employmentType==='Self-Employed'?'selected':'' %>>Self-Employed</option>
+            <option <%= application.employmentType==='Business'?'selected':'' %>>Business</option>
+            <option <%= application.employmentType==='Unemployed'?'selected':'' %>>Unemployed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-3">
+        <button id="run-simulation-btn" class="btn-gradient px-6 py-3 rounded-lg font-semibold">▶ Run Simulation</button>
+        <button id="save-scenario-btn" class="hidden px-6 py-3 rounded-lg font-semibold border border-white/20 hover:bg-white/5 transition">💾 Save Scenario</button>
+        <input id="scenario-label-input" type="text" placeholder="Name this scenario (optional)" class="input-field hidden flex-1 min-w-[200px]" />
+      </div>
+    </div>
+
+    <!-- SCENARIO HISTORY -->
+    <div class="glass-card p-8 rounded-2xl">
+      <h2 class="font-bold text-lg mb-6">Scenario History</h2>
+      <div id="scenario-list" class="space-y-3">
+        <% if (scenarios.length === 0) { %>
+          <p class="text-slate-500 text-sm">No saved scenarios yet. Run and save a simulation above.</p>
+        <% } %>
+        <% scenarios.forEach((s, i) => { %>
+          <div class="flex justify-between items-center glass-card px-5 py-3 rounded-xl" id="scenario-<%= s._id %>">
+            <div>
+              <p class="text-sm font-semibold">Scenario #<%= scenarios.length - i %><% if (s.label) { %> — <%= s.label %><% } %></p>
+              <p class="text-xs text-slate-400 mt-0.5">
+                <span class="status-pill <%= s.simulatedPrediction==='Eligible'?'pill-green':s.simulatedPrediction==='Review'?'pill-amber':'pill-red' %>"><%= s.simulatedPrediction %></span>
+                <span class="ml-2"><%= Math.round(s.simulatedProbability*100) %>% • EMI ₹<%= s.simulatedEMI.toLocaleString('en-IN') %> • DTI <%= s.simulatedDTI %>%</span>
+              </p>
+            </div>
+            <button class="delete-scenario-btn text-red-400 hover:underline text-xs" data-id="<%= s._id %>">Delete</button>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/background.js"></script>
+  <script>
+    window.PREDICTION_ID = "<%= prediction._id %>";
+  </script>
+  <script src="/js/simulator.js"></script>
+</body>
+</html>

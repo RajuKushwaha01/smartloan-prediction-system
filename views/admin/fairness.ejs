@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">Model Fairness Analysis</h1>
+  <p class="text-slate-400 mb-8">Performance differences across dataset groups, computed on the held-out test set. This measures differences only — it does not make claims about fairness beyond the metrics shown.</p>
+
+  <% if (error) { %>
+    <div class="glass-card p-8 rounded-2xl text-center"><p class="text-amber-400">⚠ <%= error %></p></div>
+  <% } else if (!metrics.fairness) { %>
+    <div class="glass-card p-8 rounded-2xl text-center"><p class="text-slate-400">Fairness data not available — retrain with the latest train.py to generate it.</p></div>
+  <% } else { %>
+    <% metrics.fairness.forEach(f => { %>
+      <div class="glass-card p-8 rounded-2xl mb-8">
+        <h2 class="font-bold text-lg mb-6">By <%= f.attribute %></h2>
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <% Object.entries(f.groups).forEach(([groupName, stats]) => { %>
+            <div class="glass-card p-5 rounded-xl">
+              <p class="text-sm font-semibold mb-2">Group: <%= groupName %> <span class="text-slate-500 font-normal">(n=<%= stats.n %>)</span></p>
+              <p class="text-xs text-slate-400">Accuracy: <span class="text-white font-semibold"><%= (stats.accuracy*100).toFixed(1) %>%</span></p>
+              <p class="text-xs text-slate-400">Recall: <span class="text-white font-semibold"><%= (stats.recall*100).toFixed(1) %>%</span></p>
+            </div>
+          <% }) %>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="glass-card p-5 rounded-xl text-center">
+            <p class="text-2xl font-bold <%= f.accuracy_gap > 0.1 ? 'text-amber-400' : 'text-emerald-400' %>"><%= (f.accuracy_gap*100).toFixed(1) %>%</p>
+            <p class="text-xs text-slate-400 mt-1">Accuracy Difference</p>
+          </div>
+          <div class="glass-card p-5 rounded-xl text-center">
+            <p class="text-2xl font-bold <%= f.recall_gap > 0.1 ? 'text-amber-400' : 'text-emerald-400' %>"><%= (f.recall_gap*100).toFixed(1) %>%</p>
+            <p class="text-xs text-slate-400 mt-1">Recall Difference</p>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+    <div class="glass-card p-6 rounded-2xl">
+      <p class="text-xs text-slate-500">This module measures performance differences across dataset groups on the held-out test set. It is not a certification of fairness and should be interpreted alongside the dataset's known limitations.</p>
+    </div>
+  <% } %>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+</body>
+</html>

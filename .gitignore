@@ -1,0 +1,10 @@
+node_modules/
+.env
+ml/model_artifacts/
+ml/dataset/loan_data.csv
+ml/__pycache__/
+ml/venv/
+public/uploads/profile-pictures/*
+!public/uploads/profile-pictures/.gitkeep
+*.log
+coverage/

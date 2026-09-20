@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen flex items-center justify-center px-6">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+
+  <div class="glass-card w-full max-w-md p-8 rounded-2xl glow-border">
+    <h1 class="text-2xl font-bold mb-1">Welcome Back 👋</h1>
+    <p class="text-slate-400 mb-6 text-sm">Sign in to SmartLoan AI</p>
+
+    <% if (error) { %>
+      <div class="bg-red-500/10 border border-red-500/40 text-red-300 text-sm px-4 py-2 rounded-lg mb-4">⚠ <%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/auth/login" class="space-y-4">
+      <%- include('../partials/csrf-field') %>
+      <div>
+        <label class="text-sm text-slate-300">Email</label>
+        <input type="email" name="email" value="<%= old.email || '' %>" required class="input-field" placeholder="Enter your email" />
+      </div>
+      <div>
+        <label class="text-sm text-slate-300">Password</label>
+        <input type="password" name="password" required class="input-field" placeholder="••••••••" />
+      </div>
+
+      <div class="flex justify-between items-center text-sm">
+        <label class="flex items-center gap-2 text-slate-300">
+          <input type="checkbox" name="rememberMe" class="accent-cyan-400" /> Remember me
+        </label>
+        <a href="/auth/forgot-password" class="text-cyan-400 hover:underline">Forgot Password?</a>
+      </div>
+
+      <button type="submit" class="btn-gradient w-full py-3 rounded-lg font-semibold mt-2">SIGN IN</button>
+    </form>
+
+    <p class="text-center text-sm text-slate-400 mt-6">
+      Don't have an account? <a href="/auth/register" class="text-cyan-400 hover:underline">Create one</a>
+    </p>
+    <p class="text-center text-xs text-slate-500 mt-4"><a href="/" class="hover:text-cyan-400">← Back to Home</a></p>
+  </div>
+  <script src="/js/background.js"></script>
+</body>
+</html>

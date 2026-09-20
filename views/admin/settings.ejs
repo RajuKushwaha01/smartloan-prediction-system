@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-6">Settings</h1>
+
+  <% if (updated) { %><div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-sm px-4 py-2 rounded-lg mb-6">✓ Settings updated successfully.</div><% } %>
+  <% if (pwUpdated) { %><div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-sm px-4 py-2 rounded-lg mb-6">✓ Password changed successfully.</div><% } %>
+  <% if (pwError) { %><div class="bg-red-500/10 border border-red-500/40 text-red-300 text-sm px-4 py-2 rounded-lg mb-6">⚠ <%= pwError==='current' ? 'Current password is incorrect.' : pwError==='match' ? 'New passwords do not match.' : pwError==='length' ? 'New password must be at least 6 characters.' : 'Something went wrong.' %></div><% } %>
+
+  <div class="max-w-xl space-y-6">
+    <form method="POST" action="/admin/settings/update" class="glass-card p-8 rounded-2xl space-y-4">
+      <%- include('../partials/csrf-field') %>
+      <h3 class="font-bold text-lg mb-2">Account Information</h3>
+      <div><label class="text-sm text-slate-300">Full Name</label><input type="text" name="fullName" value="<%= admin.fullName %>" required class="input-field" /></div>
+      <div><label class="text-sm text-slate-300">Phone</label><input type="text" name="phone" value="<%= admin.phone || '' %>" class="input-field" /></div>
+      <div><label class="text-sm text-slate-300">Email</label><input type="text" value="<%= admin.email %>" disabled class="input-field opacity-60" /></div>
+      <button type="submit" class="btn-gradient px-6 py-3 rounded-lg font-semibold">Save Changes</button>
+    </form>
+
+    <form method="POST" action="/admin/settings/password" class="glass-card p-8 rounded-2xl space-y-4">
+      <%- include('../partials/csrf-field') %>
+      <h3 class="font-bold text-lg mb-2">Change Password</h3>
+      <div><label class="text-sm text-slate-300">Current Password</label><input type="password" name="currentPassword" required class="input-field" /></div>
+      <div><label class="text-sm text-slate-300">New Password</label><input type="password" name="newPassword" required class="input-field" /></div>
+      <div><label class="text-sm text-slate-300">Confirm New Password</label><input type="password" name="confirmNewPassword" required class="input-field" /></div>
+      <button type="submit" class="btn-gradient px-6 py-3 rounded-lg font-semibold">Update Password</button>
+    </form>
+
+    <div class="glass-card p-6 rounded-2xl">
+      <p class="text-xs text-slate-400">Role: <span class="text-cyan-400 font-semibold">Administrator</span> • Account created <%= admin.createdAt.toDateString() %></p>
+    </div>
+  </div>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+</body>
+</html>

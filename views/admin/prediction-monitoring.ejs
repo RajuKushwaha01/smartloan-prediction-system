@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">Prediction Monitoring</h1>
+  <p class="text-slate-400 mb-8">Actual database statistics for every prediction generated.</p>
+
+  <div class="grid md:grid-cols-4 gap-5 mb-8">
+    <div class="glass-card p-6 rounded-2xl text-center"><p class="text-3xl font-extrabold"><%= totalPredictions %></p><p class="text-xs text-slate-400 mt-1">Total Predictions</p></div>
+    <div class="glass-card p-6 rounded-2xl text-center"><p class="text-3xl font-extrabold text-emerald-400"><%= eligible %></p><p class="text-xs text-slate-400 mt-1">Eligible</p></div>
+    <div class="glass-card p-6 rounded-2xl text-center"><p class="text-3xl font-extrabold text-amber-400"><%= review %></p><p class="text-xs text-slate-400 mt-1">Review</p></div>
+    <div class="glass-card p-6 rounded-2xl text-center"><p class="text-3xl font-extrabold text-red-400"><%= notEligible %></p><p class="text-xs text-slate-400 mt-1">Not Eligible</p></div>
+  </div>
+
+  <div class="glass-card p-6 rounded-2xl mb-8">
+    <h2 class="font-bold mb-4">Predictions by Month</h2>
+    <canvas id="monthChart" height="80"></canvas>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="glass-card p-6 rounded-2xl"><h2 class="font-bold mb-4">Predictions by Model Version</h2><canvas id="versionChart" height="200"></canvas></div>
+    <div class="glass-card p-6 rounded-2xl"><h2 class="font-bold mb-4">Predictions by Loan Type</h2><canvas id="typeChart" height="200"></canvas></div>
+  </div>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+  <script>
+    Chart.defaults.color = '#94A3B8'; Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+    new Chart(document.getElementById('monthChart'), { type: 'bar', data: { labels: <%- JSON.stringify(monthlyPredictions.map(m=>m.month)) %>, datasets: [{ label:'Predictions', data: <%- JSON.stringify(monthlyPredictions.map(m=>m.count)) %>, backgroundColor:'#06B6D4', borderRadius:6 }] }, options: { plugins: { legend: { display:false } } } });
+    new Chart(document.getElementById('versionChart'), { type: 'doughnut', data: { labels: <%- JSON.stringify(byModelVersion.map(v=>v._id||'Unknown')) %>, datasets: [{ data: <%- JSON.stringify(byModelVersion.map(v=>v.count)) %>, backgroundColor: ['#2563EB','#7C3AED','#06B6D4','#10B981','#F59E0B'] }] } });
+    new Chart(document.getElementById('typeChart'), { type: 'doughnut', data: { labels: <%- JSON.stringify(byLoanType.map(t=>t._id||'Unknown')) %>, datasets: [{ data: <%- JSON.stringify(byLoanType.map(t=>t.count)) %>, backgroundColor: ['#2563EB','#7C3AED','#06B6D4','#10B981','#F59E0B','#EF4444'] }] } });
+  </script>
+</body>
+</html>

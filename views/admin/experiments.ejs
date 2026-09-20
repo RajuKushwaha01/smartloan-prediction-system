@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">Experiments</h1>
+  <p class="text-slate-400 mb-8">All model candidates trained and compared before selection.</p>
+
+  <% if (error) { %>
+    <div class="glass-card p-8 rounded-2xl text-center"><p class="text-amber-400">⚠ <%= error %></p></div>
+  <% } else { %>
+    <div class="glass-card rounded-2xl overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-white/5 text-slate-300">
+          <tr><th class="text-left px-6 py-3">Model</th><th class="text-left px-6 py-3">Accuracy</th><th class="text-left px-6 py-3">Precision</th><th class="text-left px-6 py-3">Recall</th><th class="text-left px-6 py-3">F1</th><th class="text-left px-6 py-3">ROC-AUC</th><th class="text-left px-6 py-3">Status</th></tr>
+        </thead>
+        <tbody>
+          <% Object.entries(metrics.all_models).forEach(([name, stats]) => { %>
+            <tr class="border-t border-white/5 <%= name === metrics.selected_model ? 'bg-cyan-400/5' : '' %>">
+              <td class="px-6 py-3 font-medium"><%= name %></td>
+              <td class="px-6 py-3"><%= (stats.accuracy*100).toFixed(2) %>%</td>
+              <td class="px-6 py-3"><%= (stats.precision*100).toFixed(2) %>%</td>
+              <td class="px-6 py-3"><%= (stats.recall*100).toFixed(2) %>%</td>
+              <td class="px-6 py-3"><%= (stats.f1_score*100).toFixed(2) %>%</td>
+              <td class="px-6 py-3"><%= (stats.roc_auc*100).toFixed(2) %>%</td>
+              <td class="px-6 py-3"><% if (name === metrics.selected_model) { %><span class="status-pill pill-green">Deployed</span><% } else { %><span class="text-slate-500 text-xs">Candidate</span><% } %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-xs text-slate-500 mt-4">Selection metric: <%= metrics.selection_metric %></p>
+  <% } %>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+</body>
+</html>

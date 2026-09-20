@@ -1,0 +1,18 @@
+{
+  "nav_home": "Home",
+  "nav_dashboard": "Dashboard",
+  "nav_history": "History",
+  "nav_profile": "Profile",
+  "nav_settings": "Settings",
+  "nav_logout": "Logout",
+  "hero_title": "Smarter Loan Decisions, Powered by AI",
+  "hero_subtitle": "Analyze your financial profile with intelligent machine learning and understand your loan eligibility through a transparent digital experience.",
+  "btn_check_eligibility": "Check Eligibility",
+  "btn_how_it_works": "Explore How It Works",
+  "status_eligible": "Eligible",
+  "status_review": "Requires Review",
+  "status_not_eligible": "Not Eligible",
+  "apply_now": "New Application",
+  "loading": "Loading...",
+  "language": "Language"
+}

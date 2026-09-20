@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold mb-1">Application <%= application.applicationId %></h1>
+      <p class="text-slate-400 text-sm">Submitted by <%= application.user ? application.user.fullName : 'N/A' %> on <%= application.createdAt.toDateString() %></p>
+    </div>
+    <a href="/admin/applications" class="text-cyan-400 hover:underline text-sm">← Back to Applications</a>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6 mb-6">
+    <div class="glass-card p-6 rounded-2xl">
+      <h3 class="font-bold mb-4 text-cyan-400 text-sm">👤 Applicant</h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-slate-400">Name</span><span class="font-medium"><%= application.fullName %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Age</span><span class="font-medium"><%= application.age %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Gender</span><span class="font-medium"><%= application.gender %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Marital Status</span><span class="font-medium"><%= application.maritalStatus %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Dependents</span><span class="font-medium"><%= application.dependents %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Education</span><span class="font-medium"><%= application.education %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Residential Status</span><span class="font-medium"><%= application.residentialStatus %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Email</span><span class="font-medium"><%= application.user ? application.user.email : 'N/A' %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Phone</span><span class="font-medium"><%= application.user ? (application.user.phone || '-') : 'N/A' %></span></div>
+      </div>
+    </div>
+
+    <div class="glass-card p-6 rounded-2xl">
+      <h3 class="font-bold mb-4 text-cyan-400 text-sm">💼 Employment</h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-slate-400">Type</span><span class="font-medium"><%= application.employmentType %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Occupation</span><span class="font-medium"><%= application.occupation %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Employer</span><span class="font-medium"><%= application.employer || '-' %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Years Employed</span><span class="font-medium"><%= application.yearsOfEmployment %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Self Employed</span><span class="font-medium"><%= application.selfEmployed ? 'Yes' : 'No' %></span></div>
+      </div>
+    </div>
+
+    <div class="glass-card p-6 rounded-2xl">
+      <h3 class="font-bold mb-4 text-violet-400 text-sm">💰 Financial</h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-slate-400">Annual Income</span><span class="font-medium">₹<%= application.annualIncome.toLocaleString('en-IN') %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Monthly Income</span><span class="font-medium">₹<%= application.monthlyIncome.toLocaleString('en-IN') %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Co-Applicant Income</span><span class="font-medium">₹<%= (application.coApplicantIncome||0).toLocaleString('en-IN') %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Monthly Expenses</span><span class="font-medium">₹<%= application.monthlyExpenses.toLocaleString('en-IN') %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Existing EMI</span><span class="font-medium">₹<%= (application.existingEMI||0).toLocaleString('en-IN') %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Debt-to-Income Ratio</span><span class="font-medium"><%= application.debtToIncomeRatio %>%</span></div>
+      </div>
+    </div>
+
+    <div class="glass-card p-6 rounded-2xl">
+      <h3 class="font-bold mb-4 text-violet-400 text-sm">🏦 Loan & Credit</h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-slate-400">Amount</span><span class="font-medium">₹<%= application.loanAmount.toLocaleString('en-IN') %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Tenure</span><span class="font-medium"><%= application.loanTenure %> months</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Purpose</span><span class="font-medium"><%= application.loanPurpose %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Credit History</span><span class="font-medium"><%= application.creditHistory %></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Previous Loan Status</span><span class="font-medium"><%= application.previousLoanStatus %></span></div>
+      </div>
+    </div>
+  </div>
+
+  <% if (prediction) { %>
+    <div class="glass-card p-8 rounded-2xl glow-border text-center mb-6">
+      <p class="text-xs tracking-widest text-slate-400 mb-2"><%= prediction.prediction.toUpperCase() %></p>
+      <p class="text-4xl font-extrabold brand-gradient-text mb-2"><%= Math.round(prediction.probability * 100) %>%</p>
+      <p class="text-xs text-slate-500 mb-2">
+        <%= prediction.modelName || prediction.model_name %> • <%= prediction.modelVersion || prediction.model_version %> 
+        <% if (prediction.featureVersion || prediction.feature_version) { %>
+          • Feature Ver: <%= prediction.featureVersion || prediction.feature_version %>
+        <% } %>
+      </p>
+      
+      <% if (prediction.interpretation) { %>
+        <p class="text-xs text-slate-400 italic mb-4"><%= prediction.interpretation %></p>
+      <% } %>
+
+      <div class="space-y-3 max-w-md mx-auto text-left">
+        <% prediction.factors.forEach(f => { %>
+          <div>
+            <div class="flex justify-between text-xs mb-1"><span><%= f.name %></span><span class="text-slate-400"><%= Math.round(f.contribution) %>%</span></div>
+            <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden"><div class="h-2 rounded-full <%= f.impact==='Negative'?'bg-amber-500':'btn-gradient' %>" style="width:<%= Math.min(100,f.contribution) %>%"></div></div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="glass-card p-8 rounded-2xl text-center mb-6"><p class="text-slate-400">This application has not been analyzed yet.</p></div>
+  <% } %>
+
+  <!-- ============ ANOMALY FLAGS ============ -->
+  <% if (application.anomalyFlags && application.anomalyFlags.length > 0) { %>
+    <div class="glass-card p-6 rounded-2xl mb-6 border border-amber-500/30">
+      <h3 class="font-bold mb-3 text-sm text-amber-400">🚩 Anomaly Flags</h3>
+      <div class="space-y-2">
+        <% application.anomalyFlags.forEach(f => { %>
+          <div class="text-xs bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+            <span class="font-semibold text-amber-300"><%= f.severity %> severity</span> — <%= f.message %>
+            <span class="text-slate-500 ml-2"><%= new Date(f.detectedAt).toLocaleString('en-IN') %></span>
+          </div>
+        <% }) %>
+      </div>
+      <p class="text-xs text-slate-500 mt-3">These are statistical/rule-based flags for review purposes only — not a fraud determination.</p>
+    </div>
+  <% } %>
+
+  <!-- ============ HUMAN REVIEW DECISION (stored separately from AI prediction) ============ -->
+  <div class="glass-card p-6 rounded-2xl mb-6">
+    <h3 class="font-bold mb-3 text-sm">🧑‍⚖️ Administrative Decision</h3>
+    <p class="text-xs text-slate-500 mb-4">This decision is recorded independently of the AI prediction above.</p>
+    <form method="POST" action="/admin/review-queue/<%= application._id %>/decide" class="flex flex-wrap gap-3 items-center">
+       <%- include('../partials/csrf-field') %>
+      <input type="text" name="note" placeholder="Review note" class="input-field flex-1 min-w-[200px]" />
+      <select name="decision" class="input-field w-auto" required>
+        <option value="">Select decision...</option>
+        <option value="Approved">Approved</option>
+        <option value="Rejected">Rejected</option>
+        <option value="More Information Required">More Information Required</option>
+      </select>
+      <button type="submit" class="btn-gradient px-5 py-2 rounded-lg text-sm font-semibold">Submit Decision</button>
+    </form>
+  </div>
+
+  <div class="glass-card p-6 rounded-2xl mb-6">
+    <h3 class="font-bold mb-3 text-sm">Workflow Status</h3>
+    <form method="POST" action="/admin/applications/<%= application._id %>/status" class="flex gap-3">
+      <%- include('../partials/csrf-field') %>
+      <select name="workflowStatus" class="input-field w-auto">
+        <option <%= application.workflowStatus==='Submitted'?'selected':'' %>>Submitted</option>
+        <option <%= application.workflowStatus==='Under Review'?'selected':'' %>>Under Review</option>
+        <option <%= application.workflowStatus==='Approved'?'selected':'' %>>Approved</option>
+        <option <%= application.workflowStatus==='Rejected'?'selected':'' %>>Rejected</option>
+      </select>
+      <button type="submit" class="btn-gradient px-5 py-2 rounded-lg text-sm font-semibold">Update Status</button>
+    </form>
+  </div>
+
+  <div class="glass-card p-6 rounded-2xl">
+    <h3 class="font-bold mb-3 text-sm">Internal Notes</h3>
+    <div class="space-y-2 mb-4">
+      <% if (application.internalNotes.length === 0) { %><p class="text-slate-500 text-xs">No notes yet.</p><% } %>
+      <% application.internalNotes.forEach(n => { %>
+        <div class="text-xs text-slate-300 bg-white/5 rounded-lg p-3">
+          <span class="text-cyan-400 font-semibold"><%= n.addedBy %>:</span> <%= n.note %>
+          <span class="text-slate-500 ml-2"><%= new Date(n.addedAt).toLocaleString('en-IN') %></span>
+        </div>
+      <% }) %>
+    </div>
+    <form method="POST" action="/admin/applications/<%= application._id %>/note" class="flex gap-2">
+      <%- include('../partials/csrf-field') %>
+      <input type="text" name="note" placeholder="Add internal note..." class="input-field flex-1" required />
+      <button type="submit" class="btn-gradient px-5 py-2 rounded-lg text-sm font-semibold">Add</button>
+    </form>
+  </div>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+</body>
+</html>

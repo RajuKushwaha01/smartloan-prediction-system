@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">Global Explainability</h1>
+  <p class="text-slate-400 mb-8">Which features generally influence the model's predictions across the entire dataset.</p>
+
+  <% if (error) { %>
+    <div class="glass-card p-8 rounded-2xl text-center"><p class="text-amber-400">⚠ <%= error %></p></div>
+  <% } else { %>
+    <div class="glass-card p-8 rounded-2xl mb-8">
+      <h2 class="font-bold text-lg mb-6">Global Feature Importance</h2>
+      <% if (metrics.feature_importance_global && metrics.feature_importance_global.length > 0) { %>
+        <div class="space-y-5">
+          <% metrics.feature_importance_global.forEach(f => { %>
+            <div>
+              <div class="flex justify-between text-sm mb-1"><span><%= f.feature.replace(/_/g,' ') %></span><span class="text-slate-400"><%= (f.importance*100).toFixed(1) %>%</span></div>
+              <div class="w-full bg-white/10 rounded-full h-2.5 overflow-hidden"><div class="h-2.5 btn-gradient rounded-full" style="width:<%= Math.min(100, f.importance*100*4) %>%"></div></div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p class="text-slate-400 text-sm">Feature importance is only available for tree-based models (Random Forest, Decision Tree, Gradient Boosting). The currently selected model is <strong><%= metrics.selected_model %></strong>, which may not expose this directly — or the metrics file predates this feature. Retrain with the latest train.py to refresh.</p>
+      <% } %>
+    </div>
+
+    <div class="glass-card p-8 rounded-2xl mb-8">
+      <h2 class="font-bold text-lg mb-2">SHAP Architecture</h2>
+      <p class="text-xs text-slate-500 mb-6">How individual predictions are explained in this system.</p>
+      <div class="flex flex-wrap items-center gap-3 text-xs">
+        <span class="glass-card px-4 py-2 rounded-lg">Application</span><span class="text-cyan-400">→</span>
+        <span class="glass-card px-4 py-2 rounded-lg">ML Model</span><span class="text-cyan-400">→</span>
+        <span class="glass-card px-4 py-2 rounded-lg">SHAP</span><span class="text-cyan-400">→</span>
+        <span class="glass-card px-4 py-2 rounded-lg">Feature Contributions</span><span class="text-cyan-400">→</span>
+        <span class="glass-card px-4 py-2 rounded-lg">Explanation</span>
+      </div>
+      <p class="text-xs text-slate-500 mt-4">Per-prediction explanations use SHAP's TreeExplainer where the deployed model supports it; otherwise the system falls back to global feature importance.</p>
+    </div>
+
+    <% if (metrics.note) { %>
+      <div class="glass-card p-6 rounded-2xl">
+        <p class="text-xs text-amber-400">⚠ <%= metrics.note %></p>
+      </div>
+    <% } %>
+  <% } %>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+</body>
+</html>

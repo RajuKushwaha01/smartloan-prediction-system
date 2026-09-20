@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen flex items-center justify-center px-6">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+
+  <div id="analyzing-card" class="glass-card p-10 rounded-2xl max-w-md w-full text-center glow-border">
+    <div class="ai-ring mx-auto mb-6"></div>
+    <h1 class="text-xl font-bold mb-2">Analyzing Your Application</h1>
+    <p class="text-slate-400 text-sm mb-6">Application <%= application.applicationId %></p>
+
+    <ul class="text-left text-sm space-y-2.5 mb-6" id="steps">
+      <li data-step="0" class="text-slate-400 flex items-center gap-2"><span class="step-icon">○</span> Validating information</li>
+      <li data-step="1" class="text-slate-400 flex items-center gap-2"><span class="step-icon">○</span> Processing financial data</li>
+      <li data-step="2" class="text-slate-400 flex items-center gap-2"><span class="step-icon">○</span> Evaluating credit features</li>
+      <li data-step="3" class="text-slate-400 flex items-center gap-2"><span class="step-icon">○</span> Running ML model</li>
+      <li data-step="4" class="text-slate-400 flex items-center gap-2"><span class="step-icon">○</span> Generating explanation</li>
+      <li data-step="5" class="text-slate-400 flex items-center gap-2"><span class="step-icon">○</span> Preparing result</li>
+    </ul>
+
+    <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+      <div id="progress-bar" class="h-2 btn-gradient rounded-full transition-all duration-300" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Completion overlay -->
+  <div id="complete-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+    <div class="glass-card p-10 rounded-2xl text-center glow-border scale-95 opacity-0 transition-all duration-500" id="complete-card">
+      <div class="text-5xl mb-4">✨</div>
+      <p class="text-lg font-bold brand-gradient-text tracking-wide mb-2">AI ANALYSIS COMPLETE</p>
+      <p class="text-slate-400 text-sm">Redirecting to your result...</p>
+    </div>
+  </div>
+
+  <script>
+    const steps = document.querySelectorAll('#steps li');
+    const bar = document.getElementById('progress-bar');
+    let i = 0;
+
+    const interval = setInterval(() => {
+      if (i < steps.length) {
+        const iconEl = steps[i].querySelector('.step-icon');
+        iconEl.textContent = '✓';
+        steps[i].classList.remove('text-slate-400');
+        steps[i].classList.add('text-emerald-400', 'font-medium');
+        bar.style.width = `${((i + 1) / steps.length) * 100}%`;
+        i++;
+      } else {
+        clearInterval(interval);
+        runPrediction();
+      }
+    }, 550);
+
+    function runPrediction() {
+      fetch('/loan/predict/<%= application._id %>', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          if (data.redirectUrl) {
+            document.getElementById('analyzing-card').style.opacity = '0';
+            const overlay = document.getElementById('complete-overlay');
+            const card = document.getElementById('complete-card');
+            overlay.classList.remove('hidden');
+            requestAnimationFrame(() => {
+              card.classList.remove('scale-95', 'opacity-0');
+              card.classList.add('scale-100', 'opacity-100');
+            });
+            setTimeout(() => { window.location.href = data.redirectUrl; }, 1200);
+          } else {
+            alert('Prediction failed. Please try again.');
+          }
+        })
+        .catch(() => alert('Prediction failed. Please try again.'));
+    }
+  </script>
+</body>
+</html>

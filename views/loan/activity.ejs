@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/navbar') %>
+
+  <div class="max-w-2xl mx-auto px-6 pt-28 pb-16">
+    <h1 class="text-2xl font-bold mb-1">Account Activity</h1>
+    <p class="text-slate-400 text-sm mb-8">A record of actions taken on your account.</p>
+
+    <div class="glass-card rounded-2xl overflow-hidden">
+      <% if (activities.length === 0) { %>
+        <p class="text-slate-400 text-sm p-8 text-center">No activity recorded yet.</p>
+      <% } %>
+      <% activities.forEach((a, i) => { %>
+        <div class="flex gap-4 px-6 py-4 <%= i < activities.length-1 ? 'border-b border-white/5' : '' %>">
+          <div class="text-xs text-slate-500 w-32 flex-shrink-0"><%= new Date(a.timestamp).toLocaleString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) %></div>
+          <div>
+            <p class="text-sm font-semibold">
+              <% if (a.action === 'Login') { %>🔑
+              <% } else if (a.action === 'Application Submitted') { %>📝
+              <% } else if (a.action === 'Prediction Generated') { %>🤖
+              <% } else if (a.action === 'Report Downloaded') { %>📄
+              <% } else if (a.action === 'Profile Updated') { %>👤
+              <% } else if (a.action === 'Password Changed') { %>🔒
+              <% } %>
+              <%= a.action %>
+            </p>
+            <% if (a.details) { %><p class="text-xs text-slate-500 mt-0.5"><%= a.details %></p><% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+  <script src="/js/background.js"></script>
+</body>
+</html>

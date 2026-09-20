@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/navbar') %>
+
+  <div class="max-w-2xl mx-auto px-6 pt-28 pb-16">
+    <h1 class="text-2xl font-bold mb-6">Settings</h1>
+
+    <% if (updated) { %><div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-sm px-4 py-2 rounded-lg mb-6">✓ Settings updated.</div><% } %>
+
+    <form method="POST" action="/loan/profile/update" class="glass-card p-8 rounded-2xl mb-6 space-y-4">
+      <input type="hidden" name="fullName" value="<%= profileUser.fullName %>" />
+      <input type="hidden" name="phone" value="<%= profileUser.phone || '' %>" />
+      <input type="hidden" name="address" value="<%= profileUser.address || '' %>" />
+      <h3 class="font-bold text-lg mb-2">🔔 Notifications</h3>
+      <label class="flex items-center gap-2 text-sm text-slate-300">
+        <input type="checkbox" name="emailNotifications" <%= profileUser.preferences.emailNotifications ? 'checked' : '' %> class="accent-cyan-400" />
+        Email me about application updates, predictions and reports
+      </label>
+      <label class="flex items-center gap-2 text-sm text-slate-300">
+        <input type="checkbox" name="darkMode" <%= profileUser.preferences.darkMode ? 'checked' : '' %> class="accent-cyan-400" />
+        Default to dark mode on new devices
+      </label>
+      <button type="submit" class="btn-gradient px-6 py-3 rounded-lg font-semibold mt-2">Save Notification Preferences</button>
+    </form>
+
+    <div class="glass-card p-8 rounded-2xl mb-6">
+      <h3 class="font-bold text-lg mb-4">🎨 Appearance</h3>
+      <p class="text-sm text-slate-400 mb-4">Choose your preferred theme for this device.</p>
+      <div class="flex gap-3">
+        <button type="button" onclick="document.documentElement.setAttribute('data-theme','light');document.body.setAttribute('data-theme-body','light');localStorage.setItem('smartloan-theme','light');" class="px-5 py-2.5 rounded-lg border border-white/20 hover:bg-white/5 transition text-sm">☀ Light</button>
+        <button type="button" onclick="document.documentElement.setAttribute('data-theme','dark');document.body.setAttribute('data-theme-body','dark');localStorage.setItem('smartloan-theme','dark');" class="px-5 py-2.5 rounded-lg border border-white/20 hover:bg-white/5 transition text-sm">🌙 Dark</button>
+      </div>
+    </div>
+
+    <div class="glass-card p-8 rounded-2xl mb-6">
+      <h3 class="font-bold text-lg mb-2">🔐 Privacy</h3>
+      <p class="text-sm text-slate-400">Your application data is used only to generate eligibility predictions and is never shared with third parties. Contact an administrator to request account or data deletion.</p>
+    </div>
+
+    <a href="/loan/profile" class="text-cyan-400 hover:underline text-sm">← Manage full profile & password</a>
+  </div>
+  <script src="/js/background.js"></script>
+</body>
+</html>

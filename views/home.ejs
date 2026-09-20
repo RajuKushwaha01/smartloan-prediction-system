@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('partials/head') %></head>
+<body class="bg-app text-white overflow-x-hidden">
+
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <div class="fixed inset-0 -z-10 grid-overlay"></div>
+
+  <%- include('partials/navbar') %>
+
+  <!-- ============ HERO ============ -->
+  <section id="home" class="min-h-screen flex items-center px-6 pt-32 pb-16 max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-14 items-center w-full">
+      <div>
+        <span class="inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-cyan-300 bg-cyan-400/10 border border-cyan-400/20 px-4 py-1.5 rounded-full mb-6">
+          <span class="logo-dot"></span> AI-POWERED DECISION SUPPORT
+        </span>
+        <h1 class="text-hero mb-6">
+          Smarter Loan Decisions, <span class="brand-gradient-text">Powered by AI</span>
+        </h1>
+        <p class="text-body text-lg mb-8 max-w-lg">
+          Analyze your financial profile with intelligent machine learning and understand your loan eligibility through a transparent digital experience.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="/auth/register" class="btn-gradient px-7 py-3.5 rounded-lg font-semibold">✦ Check Eligibility</a>
+          <a href="#how" class="px-7 py-3.5 rounded-lg font-semibold border border-white/15 hover:bg-white/5 transition">▶ Explore How It Works</a>
+        </div>
+
+        <div class="flex items-center gap-8 mt-10 text-sm">
+          <div><span class="font-bold text-lg" data-counter="<%= stats.applications %>">0</span><span class="brand-gradient-text">+</span><p class="text-slate-500 text-xs mt-1">Applications</p></div>
+          <div class="w-px h-10 bg-white/10"></div>
+          <div><span class="font-bold text-lg" data-counter="<%= stats.predictions %>">0</span><p class="text-slate-500 text-xs mt-1">Predictions Made</p></div>
+        </div>
+      </div>
+
+      <!-- AI Visualization Card -->
+      <div class="glass-card p-7 rounded-2xl relative glow-border hover-lift">
+        <p class="text-meta text-cyan-400 mb-1">SMARTLOAN AI</p>
+        <p class="text-xs text-slate-500 mb-4">AI ANALYSIS</p>
+        <div class="flex flex-col items-center py-4">
+          <div class="ai-ring mb-4"></div>
+          <p class="text-5xl font-extrabold brand-gradient-text">84%</p>
+          <p class="text-meta mt-1">Model Probability</p>
+        </div>
+        <div class="space-y-2.5 mt-5 text-sm">
+          <div class="flex justify-between items-center"><span class="text-slate-300">Credit History</span><span class="text-emerald-400 font-bold">✓</span></div>
+          <div class="flex justify-between items-center"><span class="text-slate-300">Income</span><span class="text-emerald-400 font-bold">✓</span></div>
+          <div class="flex justify-between items-center"><span class="text-slate-300">Loan Ratio</span><span class="text-emerald-400 font-bold">✓</span></div>
+          <div class="flex justify-between items-center"><span class="text-slate-300">Existing Obligations</span><span class="text-amber-400 font-bold">⚠</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TRUST / FEATURE STRIP ============ -->
+  <section class="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-4 gap-6 reveal-on-scroll">
+    <% const trust = [
+      {icon:'🤖', title:'AI Analysis', desc:'Machine-learning-based prediction.'},
+      {icon:'⚡', title:'Fast Processing', desc:'Analyze applications quickly.'},
+      {icon:'🔍', title:'Explainable Results', desc:'Understand contributing factors.'},
+      {icon:'🔐', title:'Secure', desc:'Protected user information.'}
+    ]; %>
+    <% trust.forEach(f => { %>
+      <div class="glass-card p-6 rounded-2xl hover-lift">
+        <div class="text-3xl mb-3"><%= f.icon %></div>
+        <h3 class="text-card-h mb-2"><%= f.title %></h3>
+        <p class="text-body text-sm"><%= f.desc %></p>
+      </div>
+    <% }) %>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section id="how" class="max-w-6xl mx-auto px-6 py-20 text-center reveal-on-scroll">
+    <h2 class="text-section mb-4">How It Works</h2>
+    <p class="text-body mb-14 max-w-xl mx-auto">Five simple steps from application to explainable AI prediction.</p>
+
+    <div class="relative">
+      <div class="hidden md:block absolute top-6 left-0 right-0 h-0.5 bg-white/10 mx-12">
+        <div id="timeline-line-fill" class="h-0.5 btn-gradient" style="width:0%; transition: width 1.4s ease;"></div>
+      </div>
+      <div class="grid md:grid-cols-5 gap-8 relative">
+        <% const steps = ['Enter Information','Submit Application','AI Analysis','Prediction','View Explanation']; %>
+        <% steps.forEach((s,i) => { %>
+          <div class="relative">
+            <div class="w-12 h-12 mx-auto mb-4 rounded-full btn-gradient flex items-center justify-center font-bold text-sm relative z-10"><%= String(i+1).padStart(2,'0') %></div>
+            <p class="font-semibold text-sm"><%= s %></p>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STATISTICS ============ -->
+  <section class="max-w-6xl mx-auto px-6 py-20 reveal-on-scroll">
+    <div class="glass-card rounded-2xl p-10 grid md:grid-cols-4 gap-8 text-center glow-border">
+      <div>
+        <p class="text-4xl font-extrabold brand-gradient-text"><span data-counter="<%= stats.applications %>">0</span>+</p>
+        <p class="text-meta mt-2">Applications Processed</p>
+      </div>
+      <div>
+        <p class="text-4xl font-extrabold brand-gradient-text"><span data-counter="<%= stats.predictions %>">0</span>+</p>
+        <p class="text-meta mt-2">Predictions Generated</p>
+      </div>
+      <div>
+        <p class="text-4xl font-extrabold brand-gradient-text">&lt; 1 min</p>
+        <p class="text-meta mt-2">Avg. Processing Time</p>
+      </div>
+      <div>
+        <p class="text-4xl font-extrabold brand-gradient-text"><span data-counter="<%= stats.modelPerformance %>">0</span>%</p>
+        <p class="text-meta mt-2">Model Avg. Confidence</p>
+      </div>
+    </div>
+    <p class="text-center text-xs text-slate-500 mt-4">*Live figures derived from actual application and prediction data.</p>
+  </section>
+
+  <!-- ============ FEATURES ============ -->
+  <section id="features" class="max-w-6xl mx-auto px-6 py-20 reveal-on-scroll">
+    <h2 class="text-section text-center mb-4">Everything You Need</h2>
+    <p class="text-body text-center mb-14 max-w-xl mx-auto">A complete, transparent loan-eligibility experience end to end.</p>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <% const featureList = [
+        {icon:'📝', title:'Smart Application', desc:'Multi-step guided loan application form.'},
+        {icon:'🧠', title:'AI Prediction', desc:'ML-driven eligibility probability scoring.'},
+        {icon:'🔍', title:'Explainable AI', desc:'See exactly which factors drove the result.'},
+        {icon:'📊', title:'Financial Indicators', desc:'Visual breakdown of income, EMI and debt ratios.'},
+        {icon:'📜', title:'Application History', desc:'Track every submission and its outcome.'},
+        {icon:'👨‍💼', title:'Admin Analytics', desc:'Full dashboard for loan officers and admins.'},
+        {icon:'📄', title:'PDF Reports', desc:'Download a professional analysis report anytime.'},
+        {icon:'🔐', title:'Secure Authentication', desc:'Encrypted passwords and protected sessions.'},
+        {icon:'📱', title:'Responsive Design', desc:'A seamless experience on any device.'}
+      ]; %>
+      <% featureList.forEach(f => { %>
+        <div class="glass-card p-6 rounded-2xl hover-lift">
+          <div class="text-2xl mb-3"><%= f.icon %></div>
+          <h3 class="text-card-h mb-1"><%= f.title %></h3>
+          <p class="text-body text-sm"><%= f.desc %></p>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section id="faq" class="max-w-3xl mx-auto px-6 py-20 reveal-on-scroll">
+    <h2 class="text-section text-center mb-14">Frequently Asked Questions</h2>
+
+    <div class="space-y-3">
+      <% const faqs = [
+        {q:'How does SmartLoan AI work?', a:'You submit your financial and personal details through a guided form. Our trained machine-learning model analyzes the data and generates an eligibility probability along with the key contributing factors.'},
+        {q:'What information is required?', a:'Personal details, employment information, income and expenses, and details about the loan you are requesting — including amount, tenure, and purpose.'},
+        {q:'How is the prediction generated?', a:'A trained Random Forest classifier processes your application data and outputs a probability score, which is then categorized into Eligible, Review, or Not Eligible.'},
+        {q:'Can I view previous applications?', a:'Yes. Your full application history, including status and results, is available in your dashboard at any time.'},
+        {q:'Can I download my report?', a:'Yes. Every analyzed application includes a downloadable PDF report summarizing the prediction and key factors.'},
+        {q:'Does the prediction guarantee actual loan approval?', a:'No. SmartLoan AI is an ML-based decision-support tool for academic and informational purposes. It does not represent a guaranteed bank approval.'}
+      ]; %>
+      <% faqs.forEach(item => { %>
+        <div class="faq-item glass-card rounded-2xl overflow-hidden">
+          <button class="faq-question w-full flex justify-between items-center px-6 py-5 text-left font-semibold text-sm">
+            <span><%= item.q %></span>
+            <span class="faq-icon text-cyan-400 text-xl transition-transform duration-300">+</span>
+          </button>
+          <div class="faq-answer hidden px-6 pb-5 text-sm text-slate-400">
+            <%= item.a %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="max-w-4xl mx-auto px-6 py-20 text-center reveal-on-scroll">
+    <div class="glass-card rounded-2xl p-12 glow-border">
+      <h2 class="text-section mb-4">Ready to check your eligibility?</h2>
+      <p class="text-body mb-8 max-w-md mx-auto">Get an instant, explainable AI-powered prediction in under a minute.</p>
+      <a href="/auth/register" class="btn-gradient px-8 py-4 rounded-lg font-semibold inline-block">✦ Get Started Free</a>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="relative z-10 border-t border-white/10 mt-10">
+    <div class="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-4 gap-10">
+      <div>
+        <p class="font-extrabold brand-gradient-text mb-2">SMARTLOAN AI</p>
+        <p class="text-slate-500 text-sm">Intelligent Loan Eligibility Prediction, powered by machine learning.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-sm mb-3">Product</p>
+        <ul class="space-y-2 text-sm text-slate-400">
+          <li><a href="#features" class="hover:text-cyan-400 transition">Features</a></li>
+          <li><a href="#how" class="hover:text-cyan-400 transition">How It Works</a></li>
+          <li><a href="#faq" class="hover:text-cyan-400 transition">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-semibold text-sm mb-3">Developer</p>
+        <ul class="space-y-2 text-sm text-slate-400">
+          <li><a href="#" class="hover:text-cyan-400 transition">GitHub</a></li>
+          <li><a href="#" class="hover:text-cyan-400 transition">Documentation</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-semibold text-sm mb-3">Legal</p>
+        <ul class="space-y-2 text-sm text-slate-400">
+          <li><a href="#" class="hover:text-cyan-400 transition">Privacy</a></li>
+          <li><a href="#" class="hover:text-cyan-400 transition">Terms</a></li>
+          <li><a href="#" class="hover:text-cyan-400 transition">Disclaimer</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="text-center text-slate-500 text-xs pb-8">
+      © <%= new Date().getFullYear() %> SmartLoan AI — ML-based decision-support system. Not an official bank approval.
+    </div>
+  </footer>
+
+  <script src="/js/background.js"></script>
+  <script src="/js/landing.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/navbar') %>
+
+  <div class="max-w-6xl mx-auto px-6 pt-28 pb-16">
+    <h1 class="text-2xl font-bold mb-6">Application History</h1>
+
+    <!-- ============ SEARCH & FILTERS ============ -->
+    <form method="GET" class="glass-card p-6 rounded-2xl mb-6 grid md:grid-cols-4 gap-4">
+      <div class="md:col-span-2">
+        <label class="text-xs text-slate-400">Application ID</label>
+        <input type="text" name="applicationId" value="<%= filters.applicationId %>" placeholder="Search SL-XXXXXX..." class="input-field" data-debounced-search />
+      </div>
+      <div>
+        <label class="text-xs text-slate-400">Status</label>
+        <select name="status" class="input-field">
+          <option value="all" <%= filters.status==='all'?'selected':'' %>>All Status</option>
+          <option value="Pending" <%= filters.status==='Pending'?'selected':'' %>>Pending</option>
+          <option value="Analyzed" <%= filters.status==='Analyzed'?'selected':'' %>>Analyzed</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-slate-400">Prediction</label>
+        <select name="prediction" class="input-field">
+          <option value="all" <%= filters.prediction==='all'?'selected':'' %>>All Predictions</option>
+          <option value="Eligible" <%= filters.prediction==='Eligible'?'selected':'' %>>Eligible</option>
+          <option value="Review" <%= filters.prediction==='Review'?'selected':'' %>>Review</option>
+          <option value="Not Eligible" <%= filters.prediction==='Not Eligible'?'selected':'' %>>Not Eligible</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-slate-400">Min Amount (₹)</label>
+        <input type="number" name="minAmount" value="<%= filters.minAmount %>" class="input-field" />
+      </div>
+      <div>
+        <label class="text-xs text-slate-400">Max Amount (₹)</label>
+        <input type="number" name="maxAmount" value="<%= filters.maxAmount %>" class="input-field" />
+      </div>
+      <div>
+        <label class="text-xs text-slate-400">From Date</label>
+        <input type="date" name="dateFrom" value="<%= filters.dateFrom %>" class="input-field" />
+      </div>
+      <div>
+        <label class="text-xs text-slate-400">To Date</label>
+        <input type="date" name="dateTo" value="<%= filters.dateTo %>" class="input-field" />
+      </div>
+      <div>
+        <label class="text-xs text-slate-400">Sort By</label>
+        <select name="sort" class="input-field">
+          <option value="newest" <%= filters.sort==='newest'?'selected':'' %>>Newest First</option>
+          <option value="oldest" <%= filters.sort==='oldest'?'selected':'' %>>Oldest First</option>
+          <option value="amount_high" <%= filters.sort==='amount_high'?'selected':'' %>>Amount: High to Low</option>
+          <option value="amount_low" <%= filters.sort==='amount_low'?'selected':'' %>>Amount: Low to High</option>
+        </select>
+      </div>
+      <div class="md:col-span-4 flex gap-3">
+        <button type="submit" class="btn-gradient px-6 py-2.5 rounded-lg font-semibold text-sm">🔍 Apply Filters</button>
+        <a href="/loan/history" class="px-6 py-2.5 rounded-lg font-semibold text-sm border border-white/20 hover:bg-white/5 transition">Reset</a>
+      </div>
+    </form>
+
+    <div class="glass-card rounded-2xl overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-white/5 text-slate-300">
+          <tr>
+            <th class="text-left px-6 py-3">ID</th>
+            <th class="text-left px-6 py-3">Amount</th>
+            <th class="text-left px-6 py-3">Purpose</th>
+            <th class="text-left px-6 py-3">Date</th>
+            <th class="text-left px-6 py-3">Prediction</th>
+            <th class="text-left px-6 py-3">Status</th>
+            <th class="text-left px-6 py-3">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (applications.length === 0) { %>
+            <tr><td colspan="7" class="text-center py-10 text-slate-400">No applications match your filters.</td></tr>
+          <% } %>
+          <% applications.forEach(app => {
+               const pred = predictionMap[String(app._id)];
+          %>
+            <tr class="border-t border-white/5 hover:bg-white/5 transition">
+              <td class="px-6 py-3 font-medium"><%= app.applicationId %></td>
+              <td class="px-6 py-3">₹<%= app.loanAmount.toLocaleString('en-IN') %></td>
+              <td class="px-6 py-3"><%= app.loanPurpose %></td>
+              <td class="px-6 py-3"><%= app.createdAt.toDateString().slice(4,10) %></td>
+              <td class="px-6 py-3">
+                <% if (pred) { %>
+                  <span class="status-pill <%= pred.prediction === 'Eligible' ? 'pill-green' : pred.prediction === 'Review' ? 'pill-amber' : 'pill-red' %>"><%= pred.prediction %></span>
+                <% } else { %><span class="text-slate-500">—</span><% } %>
+              </td>
+              <td class="px-6 py-3"><span class="status-pill <%= app.status==='Analyzed'?'pill-green':'pill-amber' %>"><%= app.status === 'Analyzed' ? 'Completed' : 'Pending' %></span></td>
+              <td class="px-6 py-3"><a href="/loan/application/<%= app._id %>" class="text-cyan-400 hover:underline">View →</a></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+      <% if (pagination && pagination.totalPages > 1) { %>
+        <div class="flex justify-between items-center px-6 py-4 border-t border-white/5 text-sm text-slate-400">
+          <p>Showing page <%= pagination.currentPage %> of <%= pagination.totalPages %> (<%= pagination.totalCount %> total)</p>
+          <div class="flex gap-2">
+            <% if (pagination.currentPage > 1) { %>
+              <a href="?page=<%= pagination.currentPage - 1 %>" class="px-3 py-1.5 rounded-lg border border-white/20 hover:bg-white/5 transition">← Prev</a>
+            <% } %>
+            <% if (pagination.currentPage < pagination.totalPages) { %>
+              <a href="?page=<%= pagination.currentPage + 1 %>" class="px-3 py-1.5 rounded-lg border border-white/20 hover:bg-white/5 transition">Next →</a>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+  <script src="/js/background.js"></script>
+  <script src="/js/debounced-search.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">Dataset Management</h1>
+  <p class="text-slate-400 mb-8">Details of the dataset used to train the currently deployed model.</p>
+
+  <% if (error || !metrics || !metrics.dataset_stats) { %>
+    <div class="glass-card p-8 rounded-2xl text-center">
+      <p class="text-amber-400">⚠ <%= error || 'Dataset statistics are not available yet. Run train.py to generate them.' %></p>
+    </div>
+  <% } else { %>
+    <% const ds = metrics.dataset_stats; %>
+    <div class="grid md:grid-cols-5 gap-4 mb-8">
+      <div class="glass-card p-5 rounded-2xl text-center"><p class="text-xl font-bold brand-gradient-text"><%= ds.dataset_version %></p><p class="text-xs text-slate-400 mt-1">Dataset Version</p></div>
+      <div class="glass-card p-5 rounded-2xl text-center"><p class="text-xl font-bold"><%= ds.total_records %></p><p class="text-xs text-slate-400 mt-1">Total Records</p></div>
+      <div class="glass-card p-5 rounded-2xl text-center"><p class="text-xl font-bold"><%= ds.feature_count %></p><p class="text-xs text-slate-400 mt-1">Feature Count</p></div>
+      <div class="glass-card p-5 rounded-2xl text-center"><p class="text-xl font-bold"><%= ds.training_records %></p><p class="text-xs text-slate-400 mt-1">Training Records</p></div>
+      <div class="glass-card p-5 rounded-2xl text-center"><p class="text-xl font-bold"><%= ds.testing_records %></p><p class="text-xs text-slate-400 mt-1">Testing Records</p></div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <div class="glass-card p-6 rounded-2xl"><h3 class="font-bold mb-4 text-sm">Class Distribution</h3><canvas id="classChart" height="180"></canvas></div>
+      <div class="glass-card p-6 rounded-2xl"><h3 class="font-bold mb-4 text-sm">Credit History</h3><canvas id="creditChart" height="180"></canvas></div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <div class="glass-card p-6 rounded-2xl"><h3 class="font-bold mb-4 text-sm">Education</h3><canvas id="eduChart" height="180"></canvas></div>
+      <div class="glass-card p-6 rounded-2xl"><h3 class="font-bold mb-4 text-sm">Employment (Self-Employed)</h3><canvas id="empChart" height="180"></canvas></div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="glass-card p-6 rounded-2xl">
+        <h3 class="font-bold mb-3 text-sm">Income Distribution</h3>
+        <p class="text-xs text-slate-400">Min: ₹<%= Math.round(ds.income_distribution.min).toLocaleString('en-IN') %> • Max: ₹<%= Math.round(ds.income_distribution.max).toLocaleString('en-IN') %></p>
+        <p class="text-xs text-slate-400">Mean: ₹<%= Math.round(ds.income_distribution.mean).toLocaleString('en-IN') %> • Median: ₹<%= Math.round(ds.income_distribution.median).toLocaleString('en-IN') %></p>
+      </div>
+      <div class="glass-card p-6 rounded-2xl">
+        <h3 class="font-bold mb-3 text-sm">Loan Distribution (₹ thousands)</h3>
+        <p class="text-xs text-slate-400">Min: <%= ds.loan_distribution.min %> • Max: <%= ds.loan_distribution.max %></p>
+        <p class="text-xs text-slate-400">Mean: <%= ds.loan_distribution.mean.toFixed(1) %> • Median: <%= ds.loan_distribution.median %></p>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500 mt-4">Missing values handled during preprocessing: <%= ds.missing_values_handled %></p>
+  <% } %>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+  <% if (!error && metrics && metrics.dataset_stats) { %>
+  <script>
+    Chart.defaults.color = '#94A3B8';
+    const ds = <%- JSON.stringify(metrics.dataset_stats) %>;
+    new Chart(document.getElementById('classChart'), { type: 'doughnut', data: { labels: Object.keys(ds.class_distribution), datasets: [{ data: Object.values(ds.class_distribution), backgroundColor: ['#10B981','#EF4444'] }] } });
+    new Chart(document.getElementById('creditChart'), { type: 'doughnut', data: { labels: Object.keys(ds.credit_history_distribution), datasets: [{ data: Object.values(ds.credit_history_distribution), backgroundColor: ['#2563EB','#7C3AED','#06B6D4'] }] } });
+    new Chart(document.getElementById('eduChart'), { type: 'doughnut', data: { labels: Object.keys(ds.education_distribution), datasets: [{ data: Object.values(ds.education_distribution), backgroundColor: ['#F59E0B','#10B981'] }] } });
+    new Chart(document.getElementById('empChart'), { type: 'doughnut', data: { labels: Object.keys(ds.employment_distribution), datasets: [{ data: Object.values(ds.employment_distribution), backgroundColor: ['#EF4444','#06B6D4'] }] } });
+  </script>
+  <% } %>
+</body>
+</html>

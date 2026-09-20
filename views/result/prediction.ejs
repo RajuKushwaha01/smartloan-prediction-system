@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/navbar') %>
+
+  <div class="max-w-3xl mx-auto px-6 pt-28 pb-16">
+
+    <!-- ============ PREDICTION STATE CARD ============ -->
+    <div class="glass-card p-10 rounded-2xl text-center glow-border mb-8">
+      <% if (prediction.prediction === 'Eligible') { %>
+        <div class="text-5xl mb-3">✓</div>
+        <p class="tracking-widest text-sm font-bold text-emerald-400 mb-2">ELIGIBLE PREDICTION</p>
+      <% } else if (prediction.prediction === 'Review') { %>
+        <div class="text-5xl mb-3">◉</div>
+        <p class="tracking-widest text-sm font-bold text-amber-400 mb-2">REQUIRES REVIEW</p>
+      <% } else { %>
+        <div class="text-5xl mb-3">✕</div>
+        <p class="tracking-widest text-sm font-bold text-red-400 mb-2">NOT ELIGIBLE PREDICTION</p>
+      <% } %>
+
+      <p class="text-5xl font-extrabold brand-gradient-text mb-2"><%= Math.round(prediction.probability * 100) %>%</p>
+      <p class="text-slate-400 text-sm mb-1">MODEL PROBABILITY</p>
+      <p class="text-xs text-slate-500"><%= prediction.modelName || prediction.model_name %> • <%= prediction.modelVersion || prediction.model_version %></p>
+
+      <p class="text-xs text-amber-400 mt-4">⚠ This is a model prediction, not a guaranteed real-world lending decision.</p>
+      <p class="text-xs text-slate-500 mt-1">The probability shown is the model's raw output and has not been statistically calibrated — treat it as a relative confidence indicator.</p>
+      
+      <% if (prediction.interpretation) { %>
+        <p class="text-xs text-slate-400 mt-3 italic"><%= prediction.interpretation %></p>
+      <% } %>
+    </div>
+
+    <!-- ============ AI EXPLANATION ============ -->
+    <div class="glass-card p-8 rounded-2xl mb-8">
+      <h2 class="font-bold text-lg mb-1">Why did the model produce this result?</h2>
+      <p class="text-xs text-slate-500 mb-6">Explanation method: <%= prediction.explanationMethod || prediction.explanation_method %></p>
+
+      <%
+        const positiveFactors = (prediction.factors || []).filter(f => f.impact === 'Positive');
+        const negativeFactors = (prediction.factors || []).filter(f => f.impact === 'Negative');
+        const neutralFactors = (prediction.factors || []).filter(f => f.impact === 'Neutral');
+      %>
+
+      <div class="grid md:grid-cols-3 gap-4 mb-8">
+        <div>
+          <p class="text-xs font-semibold text-emerald-400 mb-3">POSITIVE FACTORS</p>
+          <% if (positiveFactors.length === 0) { %><p class="text-xs text-slate-500">None identified</p><% } %>
+          <% positiveFactors.forEach(f => { %>
+            <div class="flex items-center gap-2 text-sm mb-2"><span class="text-emerald-400 font-bold">✓</span><span class="text-slate-300"><%= f.name %></span></div>
+          <% }) %>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-amber-400 mb-3">NEGATIVE FACTORS</p>
+          <% if (negativeFactors.length === 0) { %><p class="text-xs text-slate-500">None identified</p><% } %>
+          <% negativeFactors.forEach(f => { %>
+            <div class="flex items-center gap-2 text-sm mb-2"><span class="text-amber-400 font-bold">⚠</span><span class="text-slate-300"><%= f.name %></span></div>
+          <% }) %>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-400 mb-3">NEUTRAL FACTORS</p>
+          <% if (neutralFactors.length === 0) { %><p class="text-xs text-slate-500">None identified</p><% } %>
+          <% neutralFactors.forEach(f => { %>
+            <div class="flex items-center gap-2 text-sm mb-2"><span class="text-slate-500 font-bold">•</span><span class="text-slate-300"><%= f.name %></span></div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Feature Importance Bars -->
+      <div class="space-y-5">
+        <% (prediction.factors || []).forEach(f => { %>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span><%= f.name %></span>
+              <span class="text-slate-400"><%= Math.round(f.contribution) %>%</span>
+            </div>
+            <div class="w-full bg-white/10 rounded-full h-2.5 overflow-hidden">
+              <div class="h-2.5 rounded-full <%= f.impact === 'Negative' ? 'bg-amber-500' : f.impact === 'Neutral' ? 'bg-slate-500' : 'btn-gradient' %>" style="width:<%= Math.min(100, f.contribution) %>%"></div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- ============ FINANCIAL HEALTH DASHBOARD ============ -->
+    <% const fh = prediction.financialHealth || prediction.financial_health || {}; %>
+    <div class="glass-card p-8 rounded-2xl mb-8">
+      <h2 class="font-bold text-lg mb-1">Financial Health Dashboard</h2>
+      <p class="text-xs text-slate-500 mb-6">Project-derived indicators — not official banking ratings.</p>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span>Income Stability</span><span class="font-bold"><%= Math.round(fh.incomeStability || fh.income_stability || 0) %>%</span></div>
+          <div class="w-full bg-white/10 rounded-full h-2.5 overflow-hidden"><div class="h-2.5 rounded-full bg-emerald-500" style="width:<%= Math.min(100, fh.incomeStability || fh.income_stability || 0) %>%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span>Loan Affordability</span><span class="font-bold"><%= Math.round(fh.loanAffordability || fh.loan_affordability || 0) %>%</span></div>
+          <div class="w-full bg-white/10 rounded-full h-2.5 overflow-hidden"><div class="h-2.5 rounded-full bg-cyan-500" style="width:<%= Math.min(100, fh.loanAffordability || fh.loan_affordability || 0) %>%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span>Debt Burden</span><span class="font-bold"><%= Math.round(fh.debtBurden || fh.debt_burden || 0) %>%</span></div>
+          <div class="w-full bg-white/10 rounded-full h-2.5 overflow-hidden"><div class="h-2.5 rounded-full bg-amber-500" style="width:<%= Math.min(100, fh.debtBurden || fh.debt_burden || 0) %>%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ AI LOAN RECOMMENDATION ============ -->
+    <% if (prediction.recommendation) { %>
+      <div class="glass-card p-8 rounded-2xl mb-8 glow-border">
+        <h2 class="font-bold text-lg mb-1">🤖 AI Loan Recommendation</h2>
+        <p class="text-xs text-slate-500 mb-6"><%= prediction.recommendation.disclaimer %></p>
+
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <p class="text-xs text-slate-400 mb-1">Requested Loan</p>
+            <p class="text-xl font-bold">₹<%= prediction.recommendation.requestedLoan.toLocaleString('en-IN') %></p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 mb-1">Recommended Range</p>
+            <p class="text-xl font-bold brand-gradient-text">₹<%= prediction.recommendation.recommendedMin.toLocaleString('en-IN') %> – ₹<%= prediction.recommendation.recommendedMax.toLocaleString('en-IN') %></p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 mb-1">Recommended Tenure</p>
+            <p class="text-xl font-bold"><%= prediction.recommendation.recommendedTenure %> months</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 mb-1">Estimated EMI</p>
+            <p class="text-xl font-bold">₹<%= prediction.recommendation.estimatedEMI.toLocaleString('en-IN') %>/mo</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 mb-6">
+          <span class="text-xs text-slate-400">Affordability:</span>
+          <span class="status-pill <%= prediction.recommendation.affordability==='High'?'pill-green':prediction.recommendation.affordability==='Moderate'?'pill-amber':'pill-red' %>"><%= prediction.recommendation.affordability %></span>
+        </div>
+
+        <div class="space-y-2">
+          <% (prediction.recommendation.factors || []).forEach(f => { %>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="<%= f.positive ? 'text-emerald-400' : 'text-amber-400' %> font-bold"><%= f.positive ? '✓' : '⚠' %></span>
+              <span class="text-slate-300"><%= f.text %></span>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- ============ APPLICATION RESULT SUMMARY ============ -->
+    <% if (prediction.application) { %>
+      <div class="glass-card p-8 rounded-2xl mb-8">
+        <h2 class="font-bold text-lg mb-6">Application Summary</h2>
+        <div class="grid md:grid-cols-2 gap-5 text-sm">
+          <div><p class="text-slate-400">Application ID</p><p class="font-semibold"><%= prediction.application.applicationId %></p></div>
+          <div><p class="text-slate-400">Prediction</p><p class="font-semibold"><%= prediction.prediction %></p></div>
+          <div><p class="text-slate-400">Probability</p><p class="font-semibold"><%= Math.round(prediction.probability * 100) %>%</p></div>
+          <div><p class="text-slate-400">Loan Amount</p><p class="font-semibold">₹<%= prediction.application.loanAmount.toLocaleString('en-IN') %></p></div>
+          <div><p class="text-slate-400">Model</p><p class="font-semibold"><%= prediction.modelName || prediction.model_name %> (<%= prediction.modelVersion || prediction.model_version %>)</p></div>
+          <div><p class="text-slate-400">Feature Version</p><p class="font-semibold"><%= prediction.featureVersion || prediction.feature_version || 'n/a' %></p></div>
+          <div><p class="text-slate-400">Date & Time</p><p class="font-semibold"><%= prediction.createdAt ? prediction.createdAt.toLocaleString('en-IN') : new Date().toLocaleString('en-IN') %></p></div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- ============ REPORT VERIFICATION CARD ============ -->
+    <div class="glass-card p-6 rounded-2xl mb-8">
+      <p class="text-xs text-slate-400 mb-1">🔗 Report Verification</p>
+      <p class="text-xs text-slate-500">Each time you download a report, a unique verifiable Report ID and QR code are generated. Scan the QR on any printed report, or visit <span class="text-cyan-400">/verify/&lt;Report ID&gt;</span> to confirm its authenticity against our records.</p>
+    </div>
+
+    <!-- ============ ACTION BUTTONS ============ -->
+    <div class="flex flex-wrap gap-4">
+      <a href="/loan/simulate/<%= prediction._id %>" class="btn-gradient px-6 py-3 rounded-lg font-semibold">🔬 What-If Simulator</a>
+      <a href="/loan/report/<%= prediction._id %>" class="px-6 py-3 rounded-lg font-semibold border border-white/20 hover:bg-white/5 transition">Download Report</a>
+      <% if (prediction.application) { %>
+        <a href="/loan/application/<%= prediction.application._id %>" class="px-6 py-3 rounded-lg font-semibold border border-white/20 hover:bg-white/5 transition">View Application</a>
+      <% } %>
+      <a href="/loan/apply" class="px-6 py-3 rounded-lg font-semibold border border-white/20 hover:bg-white/5 transition">Apply Again</a>
+    </div>
+  </div>
+  <script src="/js/background.js"></script>
+</body>
+</html>

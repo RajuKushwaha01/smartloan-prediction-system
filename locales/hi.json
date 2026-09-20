@@ -1,0 +1,18 @@
+{
+  "nav_home": "होम",
+  "nav_dashboard": "डैशबोर्ड",
+  "nav_history": "इतिहास",
+  "nav_profile": "प्रोफ़ाइल",
+  "nav_settings": "सेटिंग्स",
+  "nav_logout": "लॉग आउट",
+  "hero_title": "एआई द्वारा संचालित, बेहतर ऋण निर्णय",
+  "hero_subtitle": "बुद्धिमान मशीन लर्निंग के साथ अपनी वित्तीय प्रोफ़ाइल का विश्लेषण करें और पारदर्शी डिजिटल अनुभव के माध्यम से अपनी ऋण पात्रता को समझें।",
+  "btn_check_eligibility": "पात्रता जांचें",
+  "btn_how_it_works": "यह कैसे काम करता है",
+  "status_eligible": "पात्र",
+  "status_review": "समीक्षा आवश्यक",
+  "status_not_eligible": "अपात्र",
+  "apply_now": "नया आवेदन",
+  "loading": "लोड हो रहा है...",
+  "language": "भाषा"
+}

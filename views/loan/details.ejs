@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/navbar') %>
+
+  <div class="max-w-4xl mx-auto px-6 pt-28 pb-16">
+    <h1 class="text-2xl font-bold mb-1">Application <%= application.applicationId %></h1>
+    <p class="text-slate-400 mb-8">
+      Submitted on <%= application.createdAt ? new Date(application.createdAt).toDateString() : '' %>
+    </p>
+
+    <!-- ============ TIMELINE (real, timestamped) ============ -->
+    <div class="glass-card p-8 rounded-2xl mb-8">
+      <h2 class="font-bold text-lg mb-6">Application Timeline</h2>
+      <%
+        const allStages = ['Draft','Submitted','Validation','AI Analysis','Prediction Generated','Under Review','Administrative Decision','Completed'];
+        const stageLabels = {
+          Draft: 'Application Created', Submitted: 'Application Submitted',
+          Validation: 'Validation Completed', 'AI Analysis': 'AI Analysis',
+          'Prediction Generated': 'Prediction Generated', 'Under Review': 'Manual Review',
+          'Administrative Decision': 'Administrative Decision', Completed: 'Completed'
+        };
+        const historyMap = {};
+        (application.statusHistory || []).forEach(h => { historyMap[h.stage] = h.timestamp; });
+        const currentIndex = allStages.indexOf(application.workflowStage);
+      %>
+      <div class="space-y-0">
+        <% allStages.forEach((stage, i) => {
+             const done = !!historyMap[stage];
+             const isCurrent = stage === application.workflowStage && !historyMap['Completed'];
+        %>
+          <div class="flex gap-4">
+            <div class="flex flex-col items-center">
+              <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold <%= done ? 'btn-gradient' : 'bg-white/10 text-slate-500' %>">
+                <%= done ? '✓' : (isCurrent ? '●' : '○') %>
+              </div>
+              <% if (i < allStages.length - 1) { %>
+                <div class="w-0.5 flex-1 <%= done ? 'bg-gradient-to-b from-cyan-400 to-violet-500' : 'bg-white/10' %>" style="min-height:32px;"></div>
+              <% } %>
+            </div>
+            <div class="pb-8">
+              <p class="text-sm font-semibold <%= done ? 'text-white' : 'text-slate-500' %>"><%= stageLabels[stage] %></p>
+              <% if (historyMap[stage]) { %><p class="text-xs text-slate-500 mt-0.5"><%= new Date(historyMap[stage]).toLocaleString('en-IN') %></p><% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- ============ ADMINISTRATIVE DECISION (if made) ============ -->
+    <% if (typeof reviewDecision !== 'undefined' && reviewDecision) { %>
+      <div class="glass-card p-6 rounded-2xl mb-6">
+        <h3 class="font-bold mb-3 text-sm">Administrative Decision</h3>
+        <span class="status-pill <%= reviewDecision.decision==='Approved'?'pill-green':reviewDecision.decision==='Rejected'?'pill-red':'pill-amber' %>"><%= reviewDecision.decision %></span>
+        <% if (reviewDecision.note) { %><p class="text-sm text-slate-300 mt-3"><%= reviewDecision.note %></p><% } %>
+        <p class="text-xs text-slate-500 mt-2">Reviewed by <%= reviewDecision.reviewerName %> on <%= new Date(reviewDecision.decidedAt).toLocaleString('en-IN') %></p>
+      </div>
+    <% } %>
+
+    <!-- ============ APPLICANT / EMPLOYMENT ============ -->
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+      <div class="glass-card p-6 rounded-2xl">
+        <h3 class="font-bold mb-4 text-cyan-400 text-sm">👤 Applicant</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Name</span>
+            <span class="font-medium"><%= application.fullName %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Age</span>
+            <span class="font-medium"><%= application.age || 'N/A' %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Education</span>
+            <span class="font-medium"><%= application.education || 'N/A' %></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6 rounded-2xl">
+        <h3 class="font-bold mb-4 text-cyan-400 text-sm">💼 Employment</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Type</span>
+            <span class="font-medium"><%= application.employmentType || 'N/A' %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Occupation</span>
+            <span class="font-medium"><%= application.occupation || 'N/A' %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Years</span>
+            <span class="font-medium"><%= application.yearsOfEmployment != null ? application.yearsOfEmployment : 'N/A' %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ FINANCIAL / LOAN ============ -->
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+      <div class="glass-card p-6 rounded-2xl">
+        <h3 class="font-bold mb-4 text-violet-400 text-sm">💰 Financial</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Income</span>
+            <span class="font-medium">₹<%= application.annualIncome ? application.annualIncome.toLocaleString('en-IN') : 0 %>/yr</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Expenses</span>
+            <span class="font-medium">₹<%= application.monthlyExpenses ? application.monthlyExpenses.toLocaleString('en-IN') : 0 %>/mo</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Existing Obligations</span>
+            <span class="font-medium">₹<%= application.existingEMI ? application.existingEMI.toLocaleString('en-IN') : 0 %>/mo</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6 rounded-2xl">
+        <h3 class="font-bold mb-4 text-violet-400 text-sm">🏦 Loan</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Amount</span>
+            <span class="font-medium">₹<%= application.loanAmount ? application.loanAmount.toLocaleString('en-IN') : 0 %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Tenure</span>
+            <span class="font-medium"><%= application.loanTenure ? application.loanTenure + ' months' : 'N/A' %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Purpose</span>
+            <span class="font-medium"><%= application.loanPurpose || 'N/A' %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ AI RESULT ============ -->
+    <% if (typeof prediction !== 'undefined' && prediction) { %>
+      <div class="glass-card p-8 rounded-2xl text-center glow-border mb-6">
+        <h3 class="font-bold mb-4 text-sm text-slate-400">🤖 AI Result</h3>
+        <p class="text-xs tracking-widest text-slate-400 mb-2"><%= prediction.prediction ? prediction.prediction.toUpperCase() : '' %></p>
+        <p class="text-4xl font-extrabold brand-gradient-text mb-3"><%= Math.round(prediction.probability || 0) %>%</p>
+        <p class="text-xs text-slate-500 mb-6"><%= prediction.modelName || 'SmartLoan Model' %> • <%= prediction.modelVersion || 'v1.0' %></p>
+        <div class="flex flex-wrap gap-3 justify-center">
+          <a href="/loan/result/<%= prediction._id %>" class="btn-gradient px-6 py-2.5 rounded-lg font-semibold text-sm">View Full Explanation</a>
+          <a href="/loan/report/<%= prediction._id %>" class="px-6 py-2.5 rounded-lg font-semibold text-sm border border-white/20 hover:bg-white/5 transition">Download Report</a>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="glass-card p-8 rounded-2xl text-center mb-6">
+        <p class="text-slate-400 mb-4">This application hasn't been analyzed yet.</p>
+        <a href="/loan/analyze/<%= application._id %>" class="btn-gradient px-6 py-3 rounded-lg font-semibold inline-block">Analyze Now</a>
+      </div>
+    <% } %>
+
+    <a href="/loan/history" class="text-cyan-400 hover:underline text-sm inline-block">← Back to History</a>
+  </div>
+
+  <script src="/js/background.js"></script>
+</body>
+</html>

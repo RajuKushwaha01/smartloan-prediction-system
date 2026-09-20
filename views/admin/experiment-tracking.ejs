@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">Experiment Tracking</h1>
+  <p class="text-slate-400 mb-8">Permanent record of every training experiment, approved by an admin.</p>
+
+  <% if (experiments.length === 0) { %>
+    <div class="glass-card p-10 rounded-2xl text-center"><p class="text-slate-400">No experiments recorded yet. Approve a model from the <a href="/admin/retraining" class="text-cyan-400 hover:underline">Retraining</a> page to log experiments.</p></div>
+  <% } %>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <% experiments.forEach(exp => { %>
+      <div class="glass-card p-6 rounded-2xl <%= exp.wasSelected ? 'border border-cyan-500/30 glow-border' : '' %>">
+        <div class="flex justify-between items-center mb-4">
+          <p class="font-bold">EXPERIMENT #<%= exp.experimentNumber %></p>
+          <% if (exp.wasSelected) { %><span class="status-pill pill-green">Selected</span><% } %>
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-xs mb-4">
+          <div><p class="text-slate-400">Algorithm</p><p class="font-semibold"><%= exp.algorithm %></p></div>
+          <div><p class="text-slate-400">Dataset</p><p class="font-semibold"><%= exp.datasetVersion %></p></div>
+          <div><p class="text-slate-400">Features</p><p class="font-semibold"><%= exp.featureCount %></p></div>
+          <div><p class="text-slate-400">Train / Test</p><p class="font-semibold"><%= exp.trainSplitPct %>% / <%= exp.testSplitPct %>%</p></div>
+        </div>
+        <div class="grid grid-cols-5 gap-2 text-center text-xs">
+          <div class="bg-white/5 rounded-lg p-2"><p class="font-bold"><%= (exp.metrics.accuracy*100).toFixed(1) %>%</p><p class="text-slate-500">Acc</p></div>
+          <div class="bg-white/5 rounded-lg p-2"><p class="font-bold"><%= (exp.metrics.precision*100).toFixed(1) %>%</p><p class="text-slate-500">Prec</p></div>
+          <div class="bg-white/5 rounded-lg p-2"><p class="font-bold"><%= (exp.metrics.recall*100).toFixed(1) %>%</p><p class="text-slate-500">Rec</p></div>
+          <div class="bg-white/5 rounded-lg p-2"><p class="font-bold"><%= (exp.metrics.f1_score*100).toFixed(1) %>%</p><p class="text-slate-500">F1</p></div>
+          <div class="bg-white/5 rounded-lg p-2"><p class="font-bold"><%= (exp.metrics.roc_auc*100).toFixed(1) %>%</p><p class="text-slate-500">AUC</p></div>
+        </div>
+        <p class="text-xs text-slate-500 mt-3">Recorded by <%= exp.recordedBy %> on <%= exp.recordedAt.toDateString() %></p>
+      </div>
+    <% }) %>
+  </div>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+</body>
+</html>

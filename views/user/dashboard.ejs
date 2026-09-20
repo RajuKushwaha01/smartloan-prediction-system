@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/navbar') %>
+
+  <div class="max-w-6xl mx-auto px-6 pt-28 pb-16">
+    <h1 class="text-2xl font-bold mb-1">Welcome back, <%= user.fullName %> 👋</h1>
+    <p class="text-slate-400 mb-8">Here's your application overview</p>
+
+    <!-- ============ STAT CARDS ============ -->
+    <div class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card p-6 rounded-2xl hover-lift">
+        <p class="text-slate-400 text-sm mb-2">Total Applications</p>
+        <p class="text-4xl font-extrabold brand-gradient-text">
+          <span data-counter="<%= stats.totalApplications %>">0</span>
+        </p>
+      </div>
+      <div class="glass-card p-6 rounded-2xl hover-lift">
+        <p class="text-slate-400 text-sm mb-2">Completed Predictions</p>
+        <p class="text-4xl font-extrabold text-emerald-400">
+          <span data-counter="<%= stats.completedPredictions %>">0</span>
+        </p>
+      </div>
+      <div class="glass-card p-6 rounded-2xl hover-lift">
+        <p class="text-slate-400 text-sm mb-2">Under Review</p>
+        <p class="text-4xl font-extrabold text-amber-400">
+          <span data-counter="<%= stats.underReview %>">0</span>
+        </p>
+      </div>
+      <div class="glass-card p-6 rounded-2xl hover-lift">
+        <p class="text-slate-400 text-sm mb-2">Reports</p>
+        <p class="text-4xl font-extrabold text-cyan-400">
+          <span data-counter="<%= stats.reportsCount %>">0</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- ============ CONTINUE DRAFT CARD ============ -->
+    <% if (draft) { %>
+      <div class="glass-card p-6 rounded-2xl mb-8 flex flex-wrap justify-between items-center gap-4 border border-amber-500/30">
+        <div>
+          <p class="text-sm font-semibold text-amber-400">📝 You have an unfinished application</p>
+          <p class="text-xs text-slate-400 mt-1">Step <%= draft.currentStep %> of 6 — last saved <%= draft.updatedAt.toLocaleString('en-IN') %></p>
+        </div>
+        <a href="/loan/apply" class="btn-gradient px-5 py-2.5 rounded-lg font-semibold text-sm">Resume Draft →</a>
+      </div>
+    <% } %>
+
+    <!-- ============ TABLE SECTION ============ -->
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Recent Applications</h2>
+      <div class="flex gap-3">
+        <a href="/loan/history" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/20 hover:bg-white/5 transition">View All</a>
+        <a href="/loan/apply" class="btn-gradient px-5 py-2 rounded-lg font-semibold text-sm">+ New Application</a>
+      </div>
+    </div>
+
+    <div class="glass-card rounded-2xl overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-white/5 text-slate-300">
+          <tr>
+            <th class="text-left px-6 py-3">Application ID</th>
+            <th class="text-left px-6 py-3">Loan Amount</th>
+            <th class="text-left px-6 py-3">Date</th>
+            <th class="text-left px-6 py-3">Prediction</th>
+            <th class="text-left px-6 py-3">Status</th>
+            <th class="text-left px-6 py-3">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!recentApplications || recentApplications.length === 0) { %>
+            <tr>
+              <td colspan="6" class="text-center py-10 text-slate-400">No applications yet. Start your first one!</td>
+            </tr>
+          <% } else { %>
+            <% recentApplications.forEach(app => { 
+                 const pred = predictionMap[String(app._id)];
+            %>
+              <tr class="border-t border-white/5 hover:bg-white/5 transition">
+                <td class="px-6 py-3 font-medium"><%= app.applicationId %></td>
+                <td class="px-6 py-3">₹<%= app.loanAmount ? app.loanAmount.toLocaleString('en-IN') : 0 %></td>
+                <td class="px-6 py-3"><%= app.createdAt ? app.createdAt.toDateString().slice(4,10) : '' %></td>
+                <td class="px-6 py-3">
+                  <% if (pred) { %>
+                    <span class="status-pill <%= pred.prediction === 'Eligible' ? 'pill-green' : pred.prediction === 'Review' ? 'pill-amber' : 'pill-red' %>">
+                      <%= pred.prediction %>
+                    </span>
+                  <% } else { %>
+                    <span class="text-slate-500">—</span>
+                  <% } %>
+                </td>
+                <td class="px-6 py-3">
+                  <span class="status-pill <%= app.status === 'Analyzed' ? 'pill-green' : 'pill-amber' %>">
+                    <%= app.status === 'Analyzed' ? 'Completed' : 'Pending' %>
+                  </span>
+                </td>
+                <td class="px-6 py-3">
+                  <a href="/loan/application/<%= app._id %>" class="text-cyan-400 hover:underline">View →</a>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/js/background.js"></script>
+  <script src="/js/interactions.js"></script>
+</body>
+</html>

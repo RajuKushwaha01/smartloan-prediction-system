@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/admin-sidebar') %>
+
+  <h1 class="text-2xl font-bold mb-1">Reports Center</h1>
+  <p class="text-slate-400 mb-8">Generate and export system-wide administrative reports.</p>
+
+  <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <div class="glass-card p-8 rounded-2xl hover-lift">
+      <div class="text-3xl mb-3">📄</div>
+      <h2 class="font-bold text-lg mb-2">Admin Summary Report</h2>
+      <p class="text-slate-400 text-sm mb-6">Total applications, prediction distribution, monthly trends, and model metrics — in one document.</p>
+      <div class="flex gap-3">
+        <a href="/admin/reports/pdf" class="btn-gradient px-5 py-2.5 rounded-lg font-semibold text-sm">Download PDF</a>
+        <a href="/admin/reports/excel" class="px-5 py-2.5 rounded-lg font-semibold text-sm border border-white/20 hover:bg-white/5 transition">Download Excel</a>
+      </div>
+    </div>
+
+    <div class="glass-card p-8 rounded-2xl hover-lift">
+      <div class="text-3xl mb-3">📊</div>
+      <h2 class="font-bold text-lg mb-2">All Applications Export</h2>
+      <p class="text-slate-400 text-sm mb-6">Full record of every application in the system, including status and prediction outcome.</p>
+      <div class="flex gap-3">
+        <a href="/admin/export/csv" class="btn-gradient px-5 py-2.5 rounded-lg font-semibold text-sm">Download CSV</a>
+        <a href="/admin/export/excel" class="px-5 py-2.5 rounded-lg font-semibold text-sm border border-white/20 hover:bg-white/5 transition">Download Excel</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass-card p-8 rounded-2xl">
+    <h2 class="font-bold text-lg mb-2">🧠 ML Model Report</h2>
+    <p class="text-slate-400 text-sm mb-6">View full model evaluation metrics on the dedicated dashboard.</p>
+    <a href="/admin/model" class="px-5 py-2.5 rounded-lg font-semibold text-sm border border-white/20 hover:bg-white/5 transition inline-block">Open ML Model Dashboard →</a>
+  </div>
+
+  <%- include('../partials/admin-sidebar-end') %>
+  <script src="/js/background.js"></script>
+</body>
+</html>
