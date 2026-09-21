@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const User = require('./models/User');
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@gmail.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@12345';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin12345';
 
 async function seedAdmin() {
     try {

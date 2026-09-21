@@ -1,8 +1,10 @@
 services:
+  # ============ NODE.JS MAIN APPLICATION ============
   - type: web
     name: smartloan-ai-node
     env: node
     plan: free
+    rootDir: .
     buildCommand: npm install
     startCommand: npm start
     envVars:
@@ -20,5 +22,23 @@ services:
         sync: false
       - key: FORCE_HTTPS_COOKIES
         value: true
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
       - key: GEMINI_API_KEY
         sync: false
+
+  # ============ PYTHON ML MICROSERVICE ============
+  - type: web
+    name: smartloan-ai-ml
+    env: python
+    plan: free
+    rootDir: ml
+    buildCommand: "pip install -r requirements.txt && python train.py"
+    startCommand: "uvicorn predict_api:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0

@@ -1,10 +1,23 @@
+# Node
 node_modules/
+npm-debug.log*
+
+# Environment
 .env
+.env.local
+
+# Python ML service
+ml/venv/
+ml/__pycache__/
 ml/model_artifacts/
 ml/dataset/loan_data.csv
-ml/__pycache__/
-ml/venv/
+
+# Uploads & logs (ephemeral on Render — never commit)
 public/uploads/profile-pictures/*
 !public/uploads/profile-pictures/.gitkeep
+logs/
+
+# Misc
+.DS_Store
 *.log
 coverage/

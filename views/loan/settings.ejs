@@ -1,17 +1,75 @@
-<div class="glass-card p-8 rounded-2xl mb-6">
-  <h3 class="font-bold text-lg mb-2">🎨 Appearance</h3>
-  <p class="text-sm text-slate-400 mb-5">Choose your preferred theme for this device.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body class="bg-app text-white min-h-screen">
+  <canvas id="bg-canvas" class="fixed inset-0 -z-10"></canvas>
+  <%- include('../partials/navbar') %>
 
-  <div class="grid grid-cols-2 gap-4">
-    <button type="button" data-theme-btn="light" class="theme-option-card">
-      <span class="text-3xl mb-2 block">☀️</span>
-      <span class="font-semibold text-sm">Light</span>
-      <span class="theme-option-check">✓</span>
-    </button>
-    <button type="button" data-theme-btn="dark" class="theme-option-card">
-      <span class="text-3xl mb-2 block">🌙</span>
-      <span class="font-semibold text-sm">Dark</span>
-      <span class="theme-option-check">✓</span>
-    </button>
+  <div class="max-w-2xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-12 sm:pb-16">
+    <h1 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Settings</h1>
+
+    <% if (updated) { %>
+      <div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-sm px-4 py-2 rounded-lg mb-4 sm:mb-6">✓ Settings updated.</div>
+    <% } %>
+
+    <!-- ============ NOTIFICATIONS ============ -->
+    <form method="POST" action="/loan/profile/update" class="glass-card p-5 sm:p-8 rounded-2xl mb-5 sm:mb-6 space-y-4">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <input type="hidden" name="fullName" value="<%= profileUser.fullName %>" />
+      <input type="hidden" name="phone" value="<%= profileUser.phone || '' %>" />
+      <input type="hidden" name="address" value="<%= profileUser.address || '' %>" />
+      <input type="hidden" name="city" value="<%= profileUser.city || '' %>" />
+      <input type="hidden" name="state" value="<%= profileUser.state || '' %>" />
+      <input type="hidden" name="pincode" value="<%= profileUser.pincode || '' %>" />
+
+      <h3 class="font-bold text-base sm:text-lg mb-1 sm:mb-2">🔔 Notifications</h3>
+
+      <label class="flex items-start gap-3 text-sm text-slate-300 cursor-pointer py-1">
+        <input type="checkbox" name="emailNotifications" <%= profileUser.preferences.emailNotifications ? 'checked' : '' %> class="accent-cyan-400 mt-0.5 flex-shrink-0 w-4 h-4" />
+        <span>Email me about application updates, predictions and reports</span>
+      </label>
+
+      <label class="flex items-start gap-3 text-sm text-slate-300 cursor-pointer py-1">
+        <input type="checkbox" name="darkMode" <%= profileUser.preferences.darkMode ? 'checked' : '' %> class="accent-cyan-400 mt-0.5 flex-shrink-0 w-4 h-4" />
+        <span>Default to dark mode on new devices</span>
+      </label>
+
+      <button type="submit" class="btn-gradient w-full sm:w-auto px-6 py-3 rounded-lg font-semibold mt-2 text-sm sm:text-base">
+        Save Notification Preferences
+      </button>
+    </form>
+
+    <!-- ============ APPEARANCE ============ -->
+    <div class="glass-card p-5 sm:p-8 rounded-2xl mb-5 sm:mb-6">
+      <h3 class="font-bold text-base sm:text-lg mb-1 sm:mb-2">🎨 Appearance</h3>
+      <p class="text-xs sm:text-sm text-slate-400 mb-4 sm:mb-5">Choose your preferred theme for this device.</p>
+
+      <div class="grid grid-cols-2 gap-3 sm:gap-4">
+        <button type="button" data-theme-btn="light" class="theme-option-card">
+          <span class="text-2xl sm:text-3xl mb-1 sm:mb-2 block">☀️</span>
+          <span class="font-semibold text-xs sm:text-sm">Light</span>
+          <span class="theme-option-check">✓</span>
+        </button>
+        <button type="button" data-theme-btn="dark" class="theme-option-card">
+          <span class="text-2xl sm:text-3xl mb-1 sm:mb-2 block">🌙</span>
+          <span class="font-semibold text-xs sm:text-sm">Dark</span>
+          <span class="theme-option-check">✓</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ============ PRIVACY ============ -->
+    <div class="glass-card p-5 sm:p-8 rounded-2xl mb-5 sm:mb-6">
+      <h3 class="font-bold text-base sm:text-lg mb-2">🔐 Privacy</h3>
+      <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+        Your application data is used only to generate eligibility predictions and is never shared with third parties.
+        Contact an administrator to request account or data deletion.
+      </p>
+    </div>
+
+    <a href="/loan/profile" class="text-cyan-400 hover:underline text-xs sm:text-sm inline-block">← Manage full profile &amp; password</a>
   </div>
-</div>
+
+  <script src="/js/background.js"></script>
+</body>
+</html>

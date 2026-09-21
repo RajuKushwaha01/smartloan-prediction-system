@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SmartLoan AI
 
 Intelligent Web-Based Loan Eligibility & Approval Prediction System using Machine Learning.
@@ -33,3 +34,7 @@ npm test
 
 ## Disclaimer
 This system produces ML-based decision-support predictions for academic purposes only. It does not constitute a real loan approval or official financial advice.s
+=======
+# smartloan-prediction-system
+SmartLoan AI is an intelligent web-based loan eligibility and approval prediction system that uses Machine Learning to analyze applicant data, predict loan eligibility, provide explainable AI insights, and manage applications through a secure admin dashboard.
+>>>>>>> 2132396ee4e6a8d00432b0c82cfa6975f8cda8b4
