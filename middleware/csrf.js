@@ -26,4 +26,15 @@ function verifyCsrf(req, res, next) {
   next();
 }
 
-module.exports = { csrfProtection, verifyCsrf };
+function verifyCsrfAfterMulter(req, res, next) {
+  const tokenFromRequest = req.body._csrf || req.headers['x-csrf-token'];
+  if (!tokenFromRequest || tokenFromRequest !== req.session.csrfToken) {
+    const err = new Error('Invalid or missing security token. Please refresh the page and try again.');
+    err.status = 403;
+    return next(err);
+  }
+  next();
+}
+
+module.exports = { csrfProtection, verifyCsrf, verifyCsrfAfterMulter };
+

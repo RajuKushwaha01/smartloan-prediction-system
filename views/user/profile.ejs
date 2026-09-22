@@ -33,11 +33,10 @@
       <p class="text-slate-400 text-sm mb-4"><%= profileUser.email %></p>
 
       <form method="POST" action="/loan/profile/picture" enctype="multipart/form-data" class="flex items-center justify-center gap-3">
-         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-         <input type="file" name="profilePicture" accept="image/jpeg,image/png,image/webp" class="text-xs text-slate-400" required />
-         <button type="submit" class="btn-gradient px-4 py-2 rounded-lg text-xs font-semibold">Upload</button>
+       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+       <input type="file" name="profilePicture" accept="image/jpeg,image/png,image/webp" class="text-xs text-slate-400" required />
+       <button type="submit" class="btn-gradient px-4 py-2 rounded-lg text-xs font-semibold">Upload</button>
       </form>
-
     </div>
 
     <!-- Account Info -->

@@ -131,6 +131,7 @@ app.use(i18nMiddleware);
 app.use(csrfProtection);
 app.use((req, res, next) => {
   if (req.path.startsWith('/api/')) return next(); // API uses session auth, not CSRF tokens
+  if (req.path === '/loan/profile/picture') return next(); // Verified after Multer in loanRoutes.js
   verifyCsrf(req, res, next);
 });
 

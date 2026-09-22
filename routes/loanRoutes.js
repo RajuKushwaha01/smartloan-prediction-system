@@ -5,6 +5,8 @@ const requireAuth = require('../middleware/auth');
 const { loanApplicationRules } = require('../middleware/validators');
 const { uploadProfilePicture } = require('../services/uploadService');
 const asyncHandler = require('../utils/asyncHandler');
+const { verifyCsrfAfterMulter } = require('../middleware/csrf');
+
 
 router.get('/dashboard', requireAuth, asyncHandler(loanController.dashboard));
 
@@ -19,7 +21,15 @@ router.get('/application/:id', requireAuth, asyncHandler(loanController.applicat
 
 router.get('/profile', requireAuth, asyncHandler(loanController.profile));
 router.post('/profile/update', requireAuth, asyncHandler(loanController.updateProfile));
-router.post('/profile/picture', requireAuth, uploadProfilePicture.single('profilePicture'), asyncHandler(loanController.uploadPicture));
+
+router.post(
+  '/profile/picture',
+  requireAuth,
+  uploadProfilePicture.single('profilePicture'),
+  verifyCsrfAfterMulter,
+  asyncHandler(loanController.uploadPicture)
+);
+
 router.post('/profile/password', requireAuth, asyncHandler(loanController.changePassword));
 
 router.get('/settings', requireAuth, asyncHandler(loanController.settings));
