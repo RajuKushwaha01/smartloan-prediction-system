@@ -29,34 +29,10 @@
         <span>Email me about application updates, predictions and reports</span>
       </label>
 
-      <label class="flex items-start gap-3 text-sm text-slate-300 cursor-pointer py-1">
-        <input type="checkbox" name="darkMode" <%= profileUser.preferences.darkMode ? 'checked' : '' %> class="accent-cyan-400 mt-0.5 flex-shrink-0 w-4 h-4" />
-        <span>Default to dark mode on new devices</span>
-      </label>
-
       <button type="submit" class="btn-gradient w-full sm:w-auto px-6 py-3 rounded-lg font-semibold mt-2 text-sm sm:text-base">
         Save Notification Preferences
       </button>
     </form>
-
-    <!-- ============ APPEARANCE ============ -->
-    <div class="glass-card p-5 sm:p-8 rounded-2xl mb-5 sm:mb-6">
-      <h3 class="font-bold text-base sm:text-lg mb-1 sm:mb-2">🎨 Appearance</h3>
-      <p class="text-xs sm:text-sm text-slate-400 mb-4 sm:mb-5">Choose your preferred theme for this device.</p>
-
-      <div class="grid grid-cols-2 gap-3 sm:gap-4">
-        <button type="button" data-theme-btn="light" class="theme-option-card">
-          <span class="text-2xl sm:text-3xl mb-1 sm:mb-2 block">☀️</span>
-          <span class="font-semibold text-xs sm:text-sm">Light</span>
-          <span class="theme-option-check">✓</span>
-        </button>
-        <button type="button" data-theme-btn="dark" class="theme-option-card">
-          <span class="text-2xl sm:text-3xl mb-1 sm:mb-2 block">🌙</span>
-          <span class="font-semibold text-xs sm:text-sm">Dark</span>
-          <span class="theme-option-check">✓</span>
-        </button>
-      </div>
-    </div>
 
     <!-- ============ PRIVACY ============ -->
     <div class="glass-card p-5 sm:p-8 rounded-2xl mb-5 sm:mb-6">

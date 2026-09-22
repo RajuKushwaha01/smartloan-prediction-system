@@ -27,7 +27,7 @@ async function getPrediction(applicationData) {
   };
 
   try {
-    const response = await axios.post(`${ML_API_URL}/predict`, payload, { timeout: 6000 });
+    const response = await axios.post(`${ML_API_URL}/predict`, payload, { timeout: 15000 });
     return response.data;
   } catch (err) {
     console.warn('⚠️ ML API unreachable, using fallback estimator:', err.message);
@@ -63,7 +63,7 @@ async function simulatePrediction(baseApplicationData, overrides) {
   };
 
   try {
-    const response = await axios.post(`${ML_API_URL}/predict/simulate`, payload, { timeout: 6000 });
+    const response = await axios.post(`${ML_API_URL}/predict/simulate`, payload, { timeout: 15000 });
     return response.data;
   } catch (err) {
     console.warn('⚠️ Simulation ML call failed, using fallback:', err.message);

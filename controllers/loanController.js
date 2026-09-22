@@ -326,8 +326,18 @@ exports.runPrediction = async (req, res) => {
     application.status = 'Analyzed';
 
     // ============ HUMAN-IN-THE-LOOP: auto-flag for review ============
-    if (result.prediction === 'Review' || (application.anomalyFlags && application.anomalyFlags.length > 0)) {
-      await pushStage(application, 'Under Review');
+    if (result.prediction === 'Review' || application.anomalyFlags.length > 0) {
+    await pushStage(application, 'Under Review');
+    if (result.prediction !== 'Review' && application.anomalyFlags.length > 0) {
+        // Prediction was fine, but the application still needs manual review —
+        // tell the user without exposing anomaly details.
+        await notify(
+          req.session.user.id,
+          `Application ${application.applicationId} requires a brief manual review before completion.`,
+          'info',
+          `/loan/result/${prediction._id}`
+        );
+      }
     } else {
       await application.save();
     }

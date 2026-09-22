@@ -61,7 +61,7 @@ async function getMonthlyTrendFiltered(baseFilter) {
   for (const m of months) {
     const start = new Date(m.year, m.month, 1);
     const end = new Date(m.year, m.month + 1, 1);
-    const count = await LoanApplication.countDocuments({ ...baseFilter, createdAt: { $gte: start, $lt: end } });
+    const count = await LoanApplication.countDocuments({ ...baseFilter, createdAt: { $gte: start,$lt: end } });
     trend.push({ month: m.label, count });
   }
   return trend;
@@ -182,18 +182,18 @@ exports.predictionMonitoring = async (req, res) => {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const start = new Date(d.getFullYear(), d.getMonth(), 1);
     const end = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-    const count = await Prediction.countDocuments({ createdAt: { $gte: start, $lt: end } });
+    const count = await Prediction.countDocuments({ createdAt: { $gte: start,$lt: end } });
     monthlyPredictions.push({ month: d.toLocaleString('default', { month: 'short', year: '2-digit' }), count });
   }
 
   const byModelVersion = await Prediction.aggregate([
-    { $group: { _id: '$modelVersion', count: { $sum: 1 } } }
+    { $group: { _id: '$modelVersion', count: {$sum: 1 } } }
   ]);
 
   const byLoanType = await Prediction.aggregate([
     { $lookup: { from: 'loanapplications', localField: 'application', foreignField: '_id', as: 'app' } },
     { $unwind: '$app' },
-    { $group: { _id: '$app.loanPurpose', count: { $sum: 1 } } }
+    { $group: { _id: '$app.loanPurpose', count: {$sum: 1 } } }
   ]);
 
   res.render('admin/prediction-monitoring', {
@@ -210,16 +210,16 @@ exports.usersList = async (req, res) => {
   const { search, status } = req.query;
   const filter = { role: 'user' };
   if (search) filter.$or = [
-    { fullName: { $regex: search, $options: 'i' } },
-    { email: { $regex: search, $options: 'i' } }
+    { fullName: { $regex: search,$options: 'i' } },
+    { email: { $regex: search,$options: 'i' } }
   ];
   if (status && status !== 'all') filter.accountStatus = status;
 
   const users = await User.find(filter).sort({ createdAt: -1 });
 
   const appCounts = await LoanApplication.aggregate([
-    { $match: { isDraft: { $ne: true } } },
-    { $group: { _id: '$user', count: { $sum: 1 } } }
+    { $match: { isDraft: {$ne: true } } },
+    { $group: { _id: '$user', count: {$sum: 1 } } }
   ]);
   const countMap = {};
   appCounts.forEach(c => { countMap[String(c._id)] = c.count; });
@@ -269,6 +269,14 @@ exports.changeUserRole = async (req, res) => {
     details: `Role changed to ${role} by admin ${req.session.user.fullName}`, ip: req.ip
   });
 
+  const { notify } = require('../services/notificationService');
+  await notify(
+    req.params.id,
+    `Your account role has been updated to "${role}" by an administrator.`,
+    'info',
+    role === 'admin' ? '/admin/dashboard' : '/loan/dashboard'
+  );
+
   res.redirect('/admin/users');
 };
 
@@ -280,7 +288,7 @@ exports.applicationsList = async (req, res) => {
   const filter = { isDraft: { $ne: true } };
   if (status && status !== 'all') filter.status = status;
   if (workflowStatus && workflowStatus !== 'all') filter.workflowStatus = workflowStatus;
-  if (search) filter.applicationId = { $regex: search, $options: 'i' };
+  if (search) filter.applicationId = { $regex: search,$options: 'i' };
   if (userId) filter.user = userId;
   if (minAmount || maxAmount) {
     filter.loanAmount = {};
@@ -345,8 +353,18 @@ exports.updateWorkflowStatus = async (req, res) => {
     previousValue: before.workflowStatus, newValue: req.body.workflowStatus, ip: req.ip
   });
 
-  if (application.user && application.user.preferences && application.user.preferences.emailNotifications) {
-    sendStatusUpdatedEmail(application.user.email, application.applicationId, req.body.workflowStatus);
+  if (application.user) {
+    const { notify } = require('../services/notificationService');
+    await notify(
+      application.user._id,
+      `Your application ${application.applicationId} status was updated to "${req.body.workflowStatus}"`,
+      req.body.workflowStatus === 'Approved' ? 'success' : req.body.workflowStatus === 'Rejected' ? 'warning' : 'info',
+      `/loan/application/${application._id}`
+    );
+
+    if (application.user.preferences && application.user.preferences.emailNotifications) {
+      sendStatusUpdatedEmail(application.user.email, application.applicationId, req.body.workflowStatus);
+    }
   }
 
   res.redirect(req.get('Referrer') || '/admin/applications');
@@ -355,9 +373,11 @@ exports.updateWorkflowStatus = async (req, res) => {
 exports.addNote = async (req, res) => {
   const { note } = req.body;
   if (note && note.trim()) {
-    await LoanApplication.findByIdAndUpdate(req.params.id, {
-      $push: { internalNotes: { note: xss(note.trim()), addedBy: req.session.user.fullName } }
-    });
+    await LoanApplication.findByIdAndUpdate(
+      req.params.id,
+      { $push: { internalNotes: { note: xss(note.trim()), addedBy: req.session.user.fullName } } },
+      { new: true }
+    );
   }
   res.redirect(req.get('Referrer') || '/admin/applications');
 };
@@ -404,7 +424,7 @@ exports.reviewQueue = async (req, res) => {
 
 exports.submitReview = async (req, res) => {
   const { decision, note } = req.body;
-  const application = await LoanApplication.findById(req.params.id);
+  const application = await LoanApplication.findById(req.params.id).populate('user', 'email preferences fullName');
   if (!application) return res.redirect('/admin/review-queue');
 
   const prediction = await Prediction.findOne({ application: application._id }).sort({ createdAt: -1 });
@@ -421,6 +441,20 @@ exports.submitReview = async (req, res) => {
 
   await pushStage(application, 'Administrative Decision');
   await pushStage(application, 'Completed');
+
+  if (application.user) {
+    const { notify } = require('../services/notificationService');
+    await notify(
+      application.user._id,
+      `A decision has been made on your application ${application.applicationId}: ${decision}`,
+      decision === 'Approved' ? 'success' : decision === 'Rejected' ? 'warning' : 'info',
+      `/loan/application/${application._id}`
+    );
+
+    if (application.user.preferences && application.user.preferences.emailNotifications) {
+      sendStatusUpdatedEmail(application.user.email, application.applicationId, decision);
+    }
+  }
 
   res.redirect('/admin/review-queue');
 };
@@ -606,9 +640,8 @@ exports.security = async (req, res) => {
   const roleChanges = await SecurityEvent.find({ type: 'role_change' }).sort({ timestamp: -1 }).limit(50);
 
   const recentFailures = await SecurityEvent.aggregate([
-    { $match: { type: 'failed_login', timestamp: { $gte: new Date(Date.now() - 60 * 60 * 1000) } } },
-    { $group: { _id: '$email', count: { $sum: 1 } } },
-    { $match: { count: { $gte: 5 } } }
+    { $match: { type: 'failed_login', timestamp: { $gte: new Date(Date.now() - 60 * 60 * 1000) } } },     {$group: { _id: '$email', count: {$sum: 1 } } },
+    { $match: { count: {$gte: 5 } } }
   ]);
 
   res.render('admin/security', {
@@ -630,7 +663,7 @@ exports.systemHealth = async (req, res) => {
 
   const start = Date.now();
   try {
-    const response = await axios.get(`${ML_API_URL}/health`, { timeout: 3000 });
+    const response = await axios.get(`${ML_API_URL}/health`, { timeout: 8000 });
     responseTimeMs = Date.now() - start;
     mlHealth = response.data;
     mlStatus = mlHealth.status === 'healthy' ? 'Online' : 'Degraded';
@@ -716,49 +749,52 @@ exports.downloadAdminReportExcel = async (req, res) => {
 };
 
 exports.exportCSV = async (req, res) => {
-  const applications = await LoanApplication.find({ isDraft: { $ne: true } }).populate('user', 'fullName email').lean();
-  const rows = applications.map(a => ({
-    ApplicationID: a.applicationId,
-    Applicant: a.user ? a.user.fullName : 'N/A',
-    Email: a.user ? a.user.email : 'N/A',
-    LoanAmount: a.loanAmount,
-    LoanPurpose: a.loanPurpose,
-    CreditHistory: a.creditHistory,
-    Status: a.status,
-    WorkflowStatus: a.workflowStatus,
-    Date: new Date(a.createdAt).toDateString()
-  }));
+  try {
+    const applications = await LoanApplication.find({ isDraft: { $ne: true } })
+      .populate('user', 'fullName email')
+      .sort({ createdAt: -1 });
 
-  const worksheet = XLSX.utils.json_to_sheet(rows);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Applications');
+    const fields = [
+      'Application ID',
+      'Applicant Name',
+      'Applicant Email',
+      'Loan Amount',
+      'Loan Purpose',
+      'Employment Type',
+      'Annual Income',
+      'Status',
+      'Workflow Stage',
+      'Created At'
+    ];
 
-  const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'csv' });
-  res.setHeader('Content-Type', 'text/csv');
-  res.setHeader('Content-Disposition', 'attachment; filename=SmartLoanAI_Applications.csv');
-  res.send(buffer);
-};
+    const rows = applications.map(app => [
+      `"${app.applicationId || ''}"`,
+      `"${app.user ? app.user.fullName : ''}"`,
+      `"${app.user ? app.user.email : ''}"`,
+      app.loanAmount || 0,
+      `"${app.loanPurpose || ''}"`,
+      `"${app.employmentType || ''}"`,
+      app.annualIncome || 0,
+      `"${app.status || ''}"`,
+      `"${app.workflowStage || ''}"`,
+      `"${app.createdAt ? new Date(app.createdAt).toISOString() : ''}"`
+    ]);
 
-exports.exportExcel = async (req, res) => {
-  const applications = await LoanApplication.find({ isDraft: { $ne: true } }).populate('user', 'fullName email').lean();
-  const rows = applications.map(a => ({
-    ApplicationID: a.applicationId,
-    Applicant: a.user ? a.user.fullName : 'N/A',
-    Email: a.user ? a.user.email : 'N/A',
-    LoanAmount: a.loanAmount,
-    LoanPurpose: a.loanPurpose,
-    CreditHistory: a.creditHistory,
-    Status: a.status,
-    WorkflowStatus: a.workflowStatus,
-    Date: new Date(a.createdAt).toDateString()
-  }));
+    const csvContent = [fields.join(','), ...rows.map(row => row.join(','))].join('\n');
 
-  const worksheet = XLSX.utils.json_to_sheet(rows);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Applications');
+    await logAudit({
+      userId: req.session.user.id,
+      userName: req.session.user.fullName,
+      action: 'export_csv',
+      resource: 'LoanApplication',
+      ip: req.ip
+    });
 
-  const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
-  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  res.setHeader('Content-Disposition', 'attachment; filename=SmartLoanAI_Applications.xlsx');
-  res.send(buffer);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="loan_applications_export.csv"');
+    return res.status(200).send(csvContent);
+  } catch (error) {
+    console.error('Error exporting CSV:', error);
+    return res.redirect(req.get('Referrer') || '/admin/applications');
+  }
 };

@@ -33,14 +33,6 @@
             <span class="theme-icon">🌙</span>
           </button>
 
-          <div class="theme-toggle-btn" style="width:auto; padding:0 8px;">
-            <select onchange="window.location.href='/loan/language/' + this.value" class="bg-transparent text-xs px-1 py-1.5 cursor-pointer border-0 outline-none" style="width:auto;" aria-label="Language">
-              <option value="en" <%= lang === 'en' ? 'selected' : '' %>>🌐 EN</option>
-              <option value="hi" <%= lang === 'hi' ? 'selected' : '' %>>🌐 हि</option>
-              <option value="te" <%= lang === 'te' ? 'selected' : '' %>>🌐 తె</option>
-            </select>
-          </div>
-
           <a href="/auth/logout" class="hover:text-red-400 transition">Logout</a>
         </div>
       <% } else if (user && user.role === 'admin') { %>

@@ -180,6 +180,15 @@ server.listen(PORT, () => {
   logger.info(`🚀 SmartLoan AI running at http://localhost:${PORT}`);
 });
 
+// Keep the ML service warm during active use (harmless if it fails —
+// this is best-effort and never blocks app startup or requests)
+if (process.env.NODE_ENV === 'production' && process.env.ML_API_URL) {
+  const axios = require('axios');
+  setInterval(() => {
+    axios.get(`${process.env.ML_API_URL}/health`, { timeout: 5000 }).catch(() => {});
+  }, 10 * 60 * 1000); // ping every 10 minutes
+}
+
 /* ============ GRACEFUL SHUTDOWN ============ */
 function gracefulShutdown(signal) {
   logger.info(`${signal} received — shutting down gracefully...`);

@@ -18,7 +18,9 @@
     <% if (draft) { %>
       <div class="bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-sm px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
         <span>📝 Resuming your saved draft (Step <%= draft.currentStep %> of 6)</span>
+       
         <form method="POST" action="/loan/apply/draft/<%= draft._id %>/delete" onsubmit="return confirm('Delete this draft and start fresh?');">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
           <button type="submit" class="text-red-400 hover:underline text-xs">Discard Draft</button>
         </form>
       </div>
